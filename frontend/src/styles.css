@@ -1,0 +1,237 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-rust: var(--rust);
+  --color-rust-soft: var(--rust-soft);
+  --color-amber-brand: var(--amber-brand);
+  --color-amber-soft: var(--amber-soft);
+  --color-ink: var(--ink);
+  --color-indigo-dusk: var(--indigo-dusk);
+  --color-sage: var(--sage);
+  --color-sand: var(--sand);
+  --color-sand-deep: var(--sand-deep);
+
+  --font-display: "Fraunces", "Playfair Display", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+
+  --shadow-warm: 0 4px 18px -8px rgba(82, 50, 30, 0.18), 0 1px 3px -1px rgba(82, 50, 30, 0.08);
+  --shadow-warm-lg: 0 18px 40px -16px rgba(82, 50, 30, 0.25), 0 4px 10px -4px rgba(82, 50, 30, 0.1);
+}
+
+:root {
+  --radius: 0.75rem;
+
+  /* Brand palette */
+  --sand: #faf6f0;
+  --sand-deep: #f0e8da;
+  --rust: #c1532b;
+  --rust-soft: #e7b9a3;
+  --amber-brand: #e8a33d;
+  --amber-soft: #f6dba0;
+  --ink: #20201d;
+  --indigo-dusk: #2e3a52;
+  --sage: #6f8f6a;
+
+  /* shadcn mappings */
+  --background: var(--sand);
+  --foreground: var(--ink);
+  --card: #fffaf2;
+  --card-foreground: var(--ink);
+  --popover: #fffaf2;
+  --popover-foreground: var(--ink);
+  --primary: var(--rust);
+  --primary-foreground: #fffaf2;
+  --secondary: #f1e7d6;
+  --secondary-foreground: var(--ink);
+  --muted: #efe6d5;
+  --muted-foreground: #7a6f5e;
+  --accent: var(--amber-brand);
+  --accent-foreground: var(--ink);
+  --destructive: #b3361c;
+  --destructive-foreground: #fffaf2;
+  --border: #e6dac3;
+  --input: #e6dac3;
+  --ring: var(--rust);
+}
+
+.dark {
+  --background: var(--indigo-dusk);
+  --foreground: var(--sand);
+  --card: #384660;
+  --card-foreground: var(--sand);
+  --popover: #384660;
+  --popover-foreground: var(--sand);
+  --primary: var(--rust);
+  --primary-foreground: #fffaf2;
+  --secondary: #475571;
+  --secondary-foreground: var(--sand);
+  --muted: #475571;
+  --muted-foreground: #b9b0a0;
+  --accent: var(--amber-brand);
+  --accent-foreground: var(--ink);
+  --border: #475571;
+  --input: #475571;
+  --ring: var(--rust);
+}
+
+@layer base {
+  * { border-color: var(--color-border); }
+  html, body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -0.01em; }
+}
+
+@utility eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--rust);
+}
+
+@utility card-warm {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-warm);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+@utility card-warm-hover {
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-warm-lg);
+  }
+}
+
+@utility btn-rust {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--rust);
+  color: #fffaf2;
+  padding: 0.75rem 1.4rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: transform 150ms ease, background 150ms ease, box-shadow 150ms ease;
+  box-shadow: 0 6px 16px -8px rgba(193, 83, 43, 0.6);
+  &:hover { transform: scale(1.03); background: #ad4824; }
+  &:active { transform: scale(0.98); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+}
+
+@utility btn-ghost-border {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: transparent;
+  color: var(--ink);
+  padding: 0.7rem 1.4rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: background 150ms ease;
+  &:hover { background: rgba(32,32,29,0.05); }
+}
+
+@utility btn-amber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--amber-brand);
+  color: var(--ink);
+  padding: 0.75rem 1.4rem;
+  border-radius: 999px;
+  font-weight: 600;
+  transition: transform 150ms ease, background 150ms ease;
+  &:hover { transform: scale(1.03); background: #d99327; }
+}
+
+@utility chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  background: var(--secondary);
+  color: var(--ink);
+}
+
+@utility input-warm {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  width: 100%;
+  font-size: 0.95rem;
+  color: var(--ink);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  &:focus { outline: none; border-color: var(--rust); box-shadow: 0 0 0 3px rgba(193,83,43,0.18); }
+}
+
+@utility divider-warm {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border), transparent);
+}
+
+@keyframes leaf-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.15); opacity: 1; }
+}
+@keyframes float-pot {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+@utility animate-float-pot { animation: float-pot 4s ease-in-out infinite; }
+@utility animate-leaf-pulse { animation: leaf-pulse 1.4s ease-in-out infinite; }
+@utility animate-pop { animation: pop 350ms ease-out; }
+
+/* Leaflet base import (loaded via package, not URL) */
