@@ -10,7 +10,9 @@ app = FastAPI(
 )
 
 from app.auth.router import router as auth_router
+from app.plants.router import router as plants_router
 app.include_router(auth_router)
+app.include_router(plants_router)
 
 # Configure CORS
 app.add_middleware(
