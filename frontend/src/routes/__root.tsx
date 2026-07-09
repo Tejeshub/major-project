@@ -5,9 +5,12 @@ import {
   createRootRouteWithContext,
   HeadContent,
   Scripts,
+  useRouter,
 } from "@tanstack/react-router";
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
+import { supabase } from "@/lib/supabase";
+import { useApp } from "@/stores/app";
 
 import appCss from "../styles.css?url";
 
@@ -78,6 +81,30 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const syncUserWithBackend = useApp(s => s.syncUserWithBackend);
+  const router = useRouter();
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
+        await syncUserWithBackend();
+        const state = useApp.getState();
+        if (state.user) {
+          if (state.plants.length === 0) {
+            router.navigate({ to: "/onboarding" });
+          } else {
+            router.navigate({ to: "/dashboard" });
+          }
+        } else {
+          router.navigate({ to: "/login" });
+        }
+      } else if (event === "SIGNED_OUT") {
+        router.navigate({ to: "/login" });
+      }
+    });
+    return () => { subscription.unsubscribe(); };
+  }, [syncUserWithBackend, router]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />

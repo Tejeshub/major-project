@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { toast } from "sonner";
 import {
   SEED_POSTS,
   SEED_PRODUCTS,
@@ -130,10 +131,11 @@ type AppState = {
   // actions
   login: (name: string, email: string, role?: Role) => void;
   syncUserWithBackend: () => Promise<void>;
+  fetchPlants: () => Promise<void>;
   logout: () => void;
   setOnboarding: (gardenType: string, plants: string[]) => void;
-  addPlant: (p: Omit<UserPlant, "id" | "addedAt">) => void;
-  updatePlant: (id: string, patch: Partial<UserPlant>) => void;
+  addPlant: (p: Omit<UserPlant, "id" | "addedAt">) => Promise<void>;
+  updatePlant: (id: string, patch: Partial<UserPlant>) => Promise<void>;
   deletePlant: (id: string) => void;
   addReminder: (r: Omit<Reminder, "id">) => void;
   markReminderDone: (id: string) => void;
@@ -266,9 +268,29 @@ export const useApp = create<AppState>()(
               user: { name, email: userData.email, avatar: avatarFor(name) }, 
               role: userData.role 
             });
+            await get().fetchPlants();
+          }
+        } catch (e: any) {
+          console.error("Failed to sync user with backend", e);
+          toast.error(`Backend Error: ${e.message || "Could not connect to API"}`);
+        }
+      },
+      fetchPlants: async () => {
+        try {
+          const { fetchWithAuth } = await import("@/lib/apiClient");
+          const response = await fetchWithAuth("/plants");
+          if (response && response.items) {
+            const mappedPlants = response.items.map((p: any) => ({
+              id: String(p.id),
+              species: p.species,
+              nickname: p.nickname || p.species,
+              gardenType: p.location_type,
+              addedAt: p.created_at
+            }));
+            set({ plants: mappedPlants });
           }
         } catch (e) {
-          console.error("Failed to sync user with backend", e);
+          console.error("Failed to fetch plants", e);
         }
       },
       logout: () => {
@@ -283,11 +305,49 @@ export const useApp = create<AppState>()(
         set({ gardenType, selectedPlants: plants, plants: initialPlants });
       },
 
-      addPlant: (p) => {
-        const plant: UserPlant = { ...p, id: id(), addedAt: new Date().toISOString() };
-        set({ plants: [...get().plants, plant] });
+      addPlant: async (p) => {
+        try {
+          const { fetchWithAuth } = await import("@/lib/apiClient");
+          const created = await fetchWithAuth("/plants", {
+            method: "POST",
+            body: JSON.stringify({ species: p.species, nickname: p.nickname, location_type: p.gardenType })
+          });
+          const newPlant = {
+            id: String(created.id),
+            species: created.species,
+            nickname: created.nickname || created.species,
+            gardenType: created.location_type,
+            addedAt: created.created_at
+          };
+          set({ plants: [...get().plants, newPlant] });
+        } catch (e) {
+          console.error("Failed to add plant", e);
+          throw e;
+        }
       },
-      updatePlant: (id, patch) => set({ plants: get().plants.map(p => p.id === id ? { ...p, ...patch } : p) }),
+      updatePlant: async (id, patch) => {
+        try {
+          const { fetchWithAuth } = await import("@/lib/apiClient");
+          const payload: any = {};
+          if (patch.species !== undefined) payload.species = patch.species;
+          if (patch.nickname !== undefined) payload.nickname = patch.nickname;
+          if (patch.gardenType !== undefined) payload.location_type = patch.gardenType;
+          
+          const updated = await fetchWithAuth(`/plants/${id}`, {
+            method: "PATCH",
+            body: JSON.stringify(payload)
+          });
+          const mappedUpdate = {
+            species: updated.species,
+            nickname: updated.nickname || updated.species,
+            gardenType: updated.location_type,
+          };
+          set({ plants: get().plants.map(p => String(p.id) === String(id) ? { ...p, ...mappedUpdate } : p) });
+        } catch (e) {
+          console.error("Failed to update plant", e);
+          throw e;
+        }
+      },
       deletePlant: (pid) => set({ plants: get().plants.filter(p => p.id !== pid), reminders: get().reminders.filter(r => r.plantId !== pid) }),
 
       addReminder: (r) => set({ reminders: [...get().reminders, { ...r, id: id() }] }),

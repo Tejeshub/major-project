@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
-from jose import jwt, JWTError
+
 import httpx
 from typing import Optional
 
@@ -11,38 +11,35 @@ from . import repository, models
 
 security = HTTPBearer()
 
-async def get_jwks():
-    async with httpx.AsyncClient() as client:
-        response = await client.get(settings.SUPABASE_JWKS_URL)
-        response.raise_for_status()
-        return response.json()
-
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: AsyncSession = Depends(get_db)
 ) -> models.User:
     token = credentials.credentials
     try:
-        # Fetch JWKS to verify the token signature
-        jwks = await get_jwks()
-        payload = jwt.decode(
-            token,
-            jwks,
-            algorithms=["RS256"],
-            audience="authenticated",
-            options={"verify_aud": False}
-        )
-        user_id: str = payload.get("sub")
-        email: str = payload.get("email")
-        role: str = payload.get("role", "gardener")
+        # Fetch user details directly from Supabase to validate the token
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{settings.SUPABASE_URL}/auth/v1/user",
+                headers={
+                    "apikey": settings.SUPABASE_ANON_KEY,
+                    "Authorization": f"Bearer {token}"
+                }
+            )
+            response.raise_for_status()
+            user_data = response.json()
+            
+        user_id = user_data.get("id")
+        email = user_data.get("email")
+        role = user_data.get("role", "gardener")
         
-        if user_id is None:
+        if not user_id:
             raise HTTPException(status_code=401, detail="Invalid token payload")
             
-    except JWTError as e:
+    except httpx.HTTPStatusError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Could not validate credentials: {str(e)}",
+            detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
 

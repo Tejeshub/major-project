@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useApp, useGates } from "@/stores/app";
 import { PLANT_OPTIONS } from "@/data/seed";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export function AddPlantModal({ open, onClose, plantId }: { open: boolean; onClose: () => void; plantId?: string }) {
@@ -16,19 +16,27 @@ export function AddPlantModal({ open, onClose, plantId }: { open: boolean; onClo
     nickname: editing?.nickname || "",
     gardenType: editing?.gardenType || "balcony",
   });
+  const [loading, setLoading] = useState(false);
 
   if (!open) return null;
 
-  const save = () => {
-    if (editing) {
-      updatePlant(editing.id, form);
-      toast.success("Plant updated");
-    } else {
-      if (!canAddPlant) { toast.error("Free plan supports up to 3 plants. Upgrade to add more."); return; }
-      addPlant({ ...form, nickname: form.nickname || form.species });
-      toast.success(`${form.nickname || form.species} added 🌿`);
+  const save = async () => {
+    setLoading(true);
+    try {
+      if (editing) {
+        await updatePlant(editing.id, form);
+        toast.success("Plant updated");
+      } else {
+        if (!canAddPlant) { toast.error("Free plan supports up to 3 plants. Upgrade to add more."); setLoading(false); return; }
+        await addPlant({ ...form, nickname: form.nickname || form.species });
+        toast.success(`${form.nickname || form.species} added 🌿`);
+      }
+      onClose();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to save plant");
+    } finally {
+      setLoading(false);
     }
-    onClose();
   };
 
   return (
@@ -62,7 +70,10 @@ export function AddPlantModal({ open, onClose, plantId }: { open: boolean; onClo
                 ))}
               </div>
             </div>
-            <button onClick={save} className="btn-rust w-full">{editing ? "Save changes" : "Add plant"}</button>
+            <button onClick={save} disabled={loading} className="btn-rust w-full flex items-center justify-center gap-2">
+              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+              {editing ? "Save changes" : "Add plant"}
+            </button>
           </div>
         </motion.div>
       </motion.div>

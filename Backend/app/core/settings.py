@@ -8,7 +8,7 @@ class Settings(BaseSettings):
 
     # Supabase
     SUPABASE_URL: str
-    SUPABASE_JWKS_URL: str
+    SUPABASE_ANON_KEY: str
 
     # API Keys
     GEMINI_API_KEY: str
