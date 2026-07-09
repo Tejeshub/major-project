@@ -129,6 +129,7 @@ type AppState = {
 
   // actions
   login: (name: string, email: string, role?: Role) => void;
+  syncUserWithBackend: () => Promise<void>;
   logout: () => void;
   setOnboarding: (gardenType: string, plants: string[]) => void;
   addPlant: (p: Omit<UserPlant, "id" | "addedAt">) => void;
@@ -255,7 +256,25 @@ export const useApp = create<AppState>()(
 
       login: (name, email, role = "gardener") =>
         set({ user: { name, email, avatar: avatarFor(name) }, role }),
-      logout: () => set({ user: null, plants: [], reminders: [], detections: [], cart: [], selectedPlants: [], gardenType: "", scanCount: 0, plan: "free" }),
+      syncUserWithBackend: async () => {
+        try {
+          const { fetchWithAuth } = await import("@/lib/apiClient");
+          const userData = await fetchWithAuth("/auth/me");
+          if (userData) {
+            const name = userData.email.split("@")[0];
+            set({ 
+              user: { name, email: userData.email, avatar: avatarFor(name) }, 
+              role: userData.role 
+            });
+          }
+        } catch (e) {
+          console.error("Failed to sync user with backend", e);
+        }
+      },
+      logout: () => {
+        import("@/lib/supabase").then(({ supabase }) => supabase.auth.signOut());
+        set({ user: null, plants: [], reminders: [], detections: [], cart: [], selectedPlants: [], gardenType: "", scanCount: 0, plan: "free" });
+      },
 
       setOnboarding: (gardenType, plants) => {
         const initialPlants: UserPlant[] = plants.map((sp) => ({
