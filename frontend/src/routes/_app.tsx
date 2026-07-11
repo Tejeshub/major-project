@@ -6,6 +6,7 @@ import { useApp } from "@/stores/app";
 export const Route = createFileRoute("/_app")({
   beforeLoad: () => {
     if (typeof window === "undefined") return;
+    if (window.location.hash.includes("access_token")) return;
     const raw = localStorage.getItem("plantnest-app-v1");
     if (!raw) throw redirect({ to: "/login" });
     try {
@@ -21,7 +22,12 @@ export const Route = createFileRoute("/_app")({
 function AppShell() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const user = useApp((s) => s.user);
-  // SSR fallback: render shell, hydration will redirect if needed
+  
+  // If we are waiting for OAuth to resolve, show a loading state instead of a blank screen
+  if (!user && window.location.hash.includes("access_token")) {
+    return <div className="min-h-screen flex items-center justify-center">Loading your profile...</div>;
+  }
+  
   if (!user) return null;
   return (
     <div className="min-h-screen pb-20 md:pb-0">

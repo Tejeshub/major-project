@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useApp } from "@/stores/app";
 import { PLANT_OPTIONS, PLANT_PHOTOS } from "@/data/seed";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Bell, MapPin } from "lucide-react";
+import { Check, Bell, MapPin, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/onboarding")({
@@ -25,17 +25,32 @@ function Onboarding() {
   const [step, setStep] = useState(1);
   const [gardenType, setGardenType] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const next = () => {
+  const next = async () => {
     if (step === 4) {
-      setOnboarding(gardenType || "balcony", selected);
-      toast.success(`Welcome${user ? ", " + user.name.split(" ")[0] : ""} 🌿`);
-      navigate({ to: "/dashboard" });
+      setLoading(true);
+      try {
+        await setOnboarding(gardenType || "balcony", selected);
+        toast.success(`Welcome${user ? ", " + user.name.split(" ")[0] : ""} 🌿`);
+        navigate({ to: "/dashboard" });
+      } catch (e) {
+        toast.error("Failed to save plants");
+      } finally {
+        setLoading(false);
+      }
     } else setStep(step + 1);
   };
-  const skip = () => {
-    setOnboarding(gardenType || "balcony", selected);
-    navigate({ to: "/dashboard" });
+  const skip = async () => {
+    setLoading(true);
+    try {
+      await setOnboarding(gardenType || "balcony", selected);
+      navigate({ to: "/dashboard" });
+    } catch (e) {
+      navigate({ to: "/dashboard" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const togglePlant = (p: string) => {
@@ -50,7 +65,10 @@ function Onboarding() {
             <div key={s} className={`h-1.5 w-8 rounded-full transition ${s <= step ? "bg-rust" : "bg-border"}`} />
           ))}
         </div>
-        <button onClick={skip} className="text-sm text-ink/60 hover:text-ink">Skip</button>
+        <button onClick={skip} disabled={loading} className="text-sm text-ink/60 hover:text-ink flex items-center gap-1">
+          {loading && <Loader2 className="w-3 h-3 animate-spin" />}
+          Skip
+        </button>
       </header>
 
       <main className="flex-1 flex items-center justify-center px-4 pb-8">
@@ -115,8 +133,14 @@ function Onboarding() {
                 <h2 className="font-display text-3xl md:text-4xl">See what's growing near you</h2>
                 <p className="text-muted-foreground mt-3 max-w-md mx-auto">Find nearby gardeners, get local weather, and discover nurseries in your area.</p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
-                  <button onClick={() => { toast.success("Location enabled"); next(); }} className="btn-rust">Allow location</button>
-                  <button onClick={next} className="btn-ghost-border">Skip for now</button>
+                  <button onClick={() => { toast.success("Location enabled"); next(); }} disabled={loading} className="btn-rust flex items-center justify-center gap-2">
+                    {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                    Allow location
+                  </button>
+                  <button onClick={next} disabled={loading} className="btn-ghost-border flex items-center justify-center gap-2">
+                    {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                    Skip for now
+                  </button>
                 </div>
               </div>
             )}
