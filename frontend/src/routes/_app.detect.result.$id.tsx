@@ -86,8 +86,8 @@ function ResultPage() {
       </details>
 
       <div className="card-warm p-5">
-        <h3 className="font-display text-lg mb-4">Recommended treatment</h3>
-        <div className="mt-3 text-sm text-ink/80 markdown-body prose prose-stone max-w-none prose-headings:font-display prose-headings:mt-6 prose-headings:mb-2 prose-p:mb-4 prose-ul:list-disc prose-ul:ml-5 prose-ol:list-decimal prose-ol:ml-5 prose-li:mb-1">
+        <h3 className="font-display text-xl mb-4 text-rust">Recommended treatment</h3>
+        <div className="mt-4 text-base leading-relaxed text-ink font-sans markdown-body prose prose-stone max-w-none prose-headings:font-display prose-headings:mt-8 prose-headings:mb-3 prose-headings:text-rust prose-p:mb-5 prose-p:text-ink/90 prose-ul:list-disc prose-ul:ml-6 prose-ol:list-decimal prose-ol:ml-6 prose-li:mb-2 prose-strong:text-ink prose-strong:font-semibold">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
             {det.treatment.join('\n\n')}
           </ReactMarkdown>

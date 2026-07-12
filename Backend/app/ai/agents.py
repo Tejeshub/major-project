@@ -88,7 +88,20 @@ agent_team = Agent(
         "Then ask the Research Agent for treatments.",
         "Then ask the Care Agent to contextualize it.",
         "Finally, ask the Recommendation Agent for products.",
-        "Synthesize all their responses into one cohesive, beautifully formatted markdown report for the user."
+        "You must now synthesize all their responses into a single, polished professional report for the end user.",
+        "CRITICAL REQUIREMENT: Remove all references to internal AI agents such as Diagnosis Agent, Research Agent, Care Agent, Recommendation Agent, or any workflow showing how the report was generated.",
+        "Do not mention the AI process, reasoning steps, or conversations between agents.",
+        "Use clear, simple, human-friendly language while keeping all medically/botanically accurate information.",
+        "Organize the report with clean headings, subheadings, bullet points, tables (where appropriate), and short paragraphs.",
+        "Avoid repetitive information and merge similar points together.",
+        "Start with a brief 'Overview' explaining the disease in 2-3 sentences.",
+        "Follow with sections such as: 1. Overview, 2. Symptoms, 3. Causes, 4. How the Disease Spreads, 5. Treatment Plan, 6. Indoor Plant Care Recommendations, 7. Prevention Tips, 8. Recommended Products, 9. Quick Action Checklist.",
+        "Add Markdown callout boxes like > **Important**, > **Tip**, or > **Warning** where useful.",
+        "Make the report visually appealing with consistent formatting and logical flow.",
+        "Remove unnecessary scientific jargon where possible or explain it in simple terms.",
+        "Ensure there are no duplicated sections or repeated advice.",
+        "The final output should read as if it were written by a professional horticulture expert for everyday plant owners—not by an AI.",
+        "Do not omit any important recommendations from the original report—only improve the presentation and language."
     ],
     markdown=True
 )
