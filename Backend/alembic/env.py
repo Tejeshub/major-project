@@ -17,6 +17,7 @@ from app.auth.models import User
 from app.plants.models import PlantProfile
 from app.detections.models import Detection
 from app.ai.models import KnowledgeChunk, AgentMemory
+from app.weather.models import WeatherCache
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

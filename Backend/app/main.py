@@ -12,9 +12,12 @@ app = FastAPI(
 from app.auth.router import router as auth_router
 from app.plants.router import router as plants_router
 from app.detections.router import router as detections_router
+from app.weather.router import router as weather_router
+
 app.include_router(auth_router)
 app.include_router(plants_router)
 app.include_router(detections_router)
+app.include_router(weather_router)
 
 # Configure CORS
 app.add_middleware(
