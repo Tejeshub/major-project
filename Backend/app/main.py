@@ -11,8 +11,10 @@ app = FastAPI(
 
 from app.auth.router import router as auth_router
 from app.plants.router import router as plants_router
+from app.detections.router import router as detections_router
 app.include_router(auth_router)
 app.include_router(plants_router)
+app.include_router(detections_router)
 
 # Configure CORS
 app.add_middleware(
@@ -26,14 +28,14 @@ app.add_middleware(
 # Global exception handler
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    # In a real app, you would log the exception and parse specific FastAPI exceptions.
-    # We are returning a standard format as requested.
+    import traceback
+    traceback.print_exc()
     return JSONResponse(
         status_code=500,
         content={
             "error": {
                 "code": "internal_error",
-                "message": "An unexpected error occurred."
+                "message": str(exc)
             }
         },
     )
