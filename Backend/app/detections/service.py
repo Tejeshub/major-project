@@ -69,7 +69,17 @@ async def process_detection(db: AsyncSession, detection_data: schemas.DetectionC
             parsed = json.loads(text_response)
             disease_name = parsed.get("disease_name", "Unknown Disease")
             confidence = float(parsed.get("confidence_score", 0.0))
-            treatment_text = parsed.get("treatment_recommendation", "Please consult a local nursery.")
+            
+            # Pass the disease to the Orchestrator Team
+            from app.ai.agents import agent_team
+            if disease_name != "Healthy" and disease_name != "Unknown Disease":
+                # Assuming indoor for now, since we don't have the plant's actual location here yet
+                prompt_to_team = f"The plant has been diagnosed with '{disease_name}'. Environment: Indoor. Please generate a full report."
+                team_response = agent_team.run(prompt_to_team)
+                treatment_text = team_response.content
+            else:
+                treatment_text = parsed.get("treatment_recommendation", "Your plant looks healthy or the disease is unknown.")
+
             
     except urllib.error.HTTPError as e:
         error_msg = e.read().decode('utf-8')

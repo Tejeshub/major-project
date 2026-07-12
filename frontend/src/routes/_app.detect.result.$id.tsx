@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Sparkles, ShoppingBag, MessageCircle, Save, Share2 } from "lucide-react";
 import { toast } from "sonner";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export const Route = createFileRoute("/_app/detect/result/$id")({
   component: ResultPage,
@@ -84,15 +86,12 @@ function ResultPage() {
       </details>
 
       <div className="card-warm p-5">
-        <h3 className="font-display text-lg">Recommended treatment</h3>
-        <ol className="mt-3 space-y-2">
-          {det.treatment.map((t, i) => (
-            <li key={i} className="flex gap-3 text-sm text-ink/80">
-              <span className="inline-flex w-6 h-6 rounded-full bg-rust-soft/40 text-rust text-xs items-center justify-center font-semibold shrink-0">{i + 1}</span>
-              {t}
-            </li>
-          ))}
-        </ol>
+        <h3 className="font-display text-lg mb-4">Recommended treatment</h3>
+        <div className="mt-3 text-sm text-ink/80 markdown-body prose prose-stone max-w-none prose-headings:font-display prose-headings:mt-6 prose-headings:mb-2 prose-p:mb-4 prose-ul:list-disc prose-ul:ml-5 prose-ol:list-decimal prose-ol:ml-5 prose-li:mb-1">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {det.treatment.join('\n\n')}
+          </ReactMarkdown>
+        </div>
       </div>
 
       <div className="card-warm p-4 bg-amber-soft/40 flex items-start gap-3">

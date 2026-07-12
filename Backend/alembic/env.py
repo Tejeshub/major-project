@@ -16,6 +16,7 @@ from app.core.database import Base
 from app.auth.models import User
 from app.plants.models import PlantProfile
 from app.detections.models import Detection
+from app.ai.models import KnowledgeChunk, AgentMemory
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -77,6 +78,7 @@ async def run_async_migrations() -> None:
     connectable = create_async_engine(
         settings.DATABASE_URL,
         poolclass=pool.NullPool,
+        connect_args={"statement_cache_size": 0, "prepared_statement_cache_size": 0}
     )
 
     async with connectable.connect() as connection:
