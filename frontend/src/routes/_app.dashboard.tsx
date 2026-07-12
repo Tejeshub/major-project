@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useApp, useGates } from "@/stores/app";
 import { PLANT_PHOTOS, SEED_POSTS } from "@/data/seed";
-import { Camera, History, ShoppingBag, Cloud, Droplets, Plus } from "lucide-react";
-import { useState } from "react";
+import { Camera, History, ShoppingBag, Cloud, Droplets, Plus, Sun, CloudRain } from "lucide-react";
+import { useState, useEffect } from "react";
 import { AddPlantModal } from "@/components/AddPlantModal";
+import { fetchWithAuth } from "@/lib/apiClient";
 
 export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — PlantNest" }] }),
@@ -23,6 +24,14 @@ function Dashboard() {
   const reminders = useApp((s) => s.reminders);
   const { canAddPlant } = useGates();
   const [addOpen, setAddOpen] = useState(false);
+  const [weather, setWeather] = useState<{temperature: number, condition: string} | null>(null);
+
+  useEffect(() => {
+    // Defaulting to New Delhi coordinates for demo purposes
+    fetchWithAuth("/weather?lat=28.6139&lng=77.2090")
+      .then(res => setWeather(res))
+      .catch(err => console.error("Weather fetch failed:", err));
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -35,14 +44,24 @@ function Dashboard() {
       <div className="card-warm p-5 md:p-6 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-2xl bg-amber-soft/60 flex items-center justify-center">
-            <Cloud className="w-7 h-7 text-rust" />
+            {weather?.condition?.toLowerCase().includes("rain") ? (
+                <CloudRain className="w-7 h-7 text-rust" />
+            ) : weather?.condition?.toLowerCase().includes("clear") ? (
+                <Sun className="w-7 h-7 text-rust" />
+            ) : (
+                <Cloud className="w-7 h-7 text-rust" />
+            )}
           </div>
           <div>
-            <p className="font-display text-2xl">28° <span className="text-base text-muted-foreground">Partly cloudy</span></p>
-            <p className="text-sm text-ink/70 mt-0.5">Skip watering today — rain expected by 3 PM.</p>
+            {weather ? (
+              <p className="font-display text-2xl">{weather.temperature}°C <span className="text-base text-muted-foreground">{weather.condition}</span></p>
+            ) : (
+              <p className="font-display text-2xl">--°C <span className="text-base text-muted-foreground">Loading...</span></p>
+            )}
+            <p className="text-sm text-ink/70 mt-0.5">Based on your location.</p>
           </div>
         </div>
-        <span className="chip !bg-amber-soft text-ink">Spraying: Favourable</span>
+        <span className="chip !bg-amber-soft text-ink">Spraying: {weather?.condition?.toLowerCase().includes("rain") ? "Avoid" : "Favourable"}</span>
       </div>
 
       {/* Quick actions */}
