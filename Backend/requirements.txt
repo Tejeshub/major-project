@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+sqlalchemy
+asyncpg
+alembic
+pydantic
+pydantic-settings
+pyjwt
+python-dotenv
+agno
+google-generativeai
+google-genai
+firecrawl-py
+exa-py
