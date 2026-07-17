@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useApp, useGates } from "@/stores/app";
 import { usePosts } from "@/hooks/useCommunity";
 import { useReminders } from "@/hooks/useReminders";
-import { PLANT_PHOTOS, SEED_POSTS } from "@/data/seed";
+import { PLANT_PHOTOS } from "@/data/seed";
 import { Camera, History, ShoppingBag, Cloud, Droplets, Plus, Sun, CloudRain } from "lucide-react";
 import { useState, useEffect } from "react";
 import { AddPlantModal } from "@/components/AddPlantModal";
