@@ -1,0 +1,18 @@
+# Backend Requirements
+# --------------------
+
+# Web Framework
+fastapi>=0.100.0  # High-performance API framework used for all endpoints
+uvicorn>=0.23.0  # ASGI server required to run FastAPI
+
+# Database & ORM
+sqlalchemy>=2.0.0  # SQL toolkit and Object-Relational Mapper (ORM) for defining models
+asyncpg>=0.28.0  # Asynchronous PostgreSQL driver used by SQLAlchemy for non-blocking DB queries
+alembic>=1.11.0  # Database migration tool configured in alembic.ini and env.py
+
+# Data Validation & Configuration
+pydantic>=2.0.0  # Data validation and parsing using Python type hints (used in schemas)
+pydantic-settings>=2.0.0  # Used in app/core/settings.py to parse and validate .env variables
+
+# External HTTP Client
+httpx>=0.24.0  # Async HTTP client used for external requests (e.g., Razorpay verification/AI calls)

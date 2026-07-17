@@ -4,7 +4,8 @@ import { Logo, HeroPot } from "@/components/ui-brand/Logo";
 import { Counter } from "@/components/ui-brand/primitives";
 import { useRef } from "react";
 import { Camera, BellRing, Store, MessageCircle, Leaf } from "lucide-react";
-import { SEED_POSTS } from "@/data/seed";
+import { useApp } from "@/stores/app";
+import { usePosts } from "@/hooks/useCommunity";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -22,6 +23,7 @@ function Landing() {
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll();
   const potY = useTransform(scrollY, [0, 600], [0, -60]);
+  const { data: posts = [] } = usePosts({ limit: 6 });
 
   return (
     <div className="min-h-screen">
@@ -128,7 +130,7 @@ function Landing() {
             <Link to="/login" className="btn-rust mt-6 inline-flex">Join the community</Link>
           </div>
           <div className="grid grid-cols-3 gap-2">
-            {SEED_POSTS.slice(0, 6).map((p, i) => (
+            {posts.slice(0, 6).map((p, i) => (
               <img key={p.id} src={p.image} alt="" className={`rounded-xl object-cover aspect-square ${i === 1 || i === 4 ? "translate-y-4" : ""}`} loading="lazy" />
             ))}
           </div>

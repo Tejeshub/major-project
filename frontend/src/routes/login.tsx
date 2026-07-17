@@ -36,6 +36,15 @@ function LoginPage() {
     setLoading(true);
     let authError = null;
 
+    // Temporary bypass for local development without real Supabase project
+    if (import.meta.env.VITE_SUPABASE_URL?.includes("mockurl")) {
+      login(form.name || form.email.split("@")[0], form.email, form.role as any);
+      setLoading(false);
+      toast.success(tab === "signup" ? "Account created 🌿" : "Welcome back");
+      navigate({ to: tab === "signup" || plants.length === 0 ? "/onboarding" : "/dashboard" });
+      return;
+    }
+
     if (tab === "signup") {
       const { error } = await supabase.auth.signUp({
         email: form.email,

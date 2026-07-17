@@ -1,9 +1,10 @@
 import { createFileRoute, useParams, useNavigate } from "@tanstack/react-router";
 import { useApp } from "@/stores/app";
 import { PLANT_PHOTOS } from "@/data/seed";
-import { Droplets, Sprout, Scissors, Edit2, Trash2 } from "lucide-react";
+import { Edit2, Trash2, Droplets, Sprout, Scissors } from "lucide-react";
 import { useState } from "react";
 import { AddPlantModal } from "@/components/AddPlantModal";
+import { useReminders, useCompleteReminder } from "@/hooks/useReminders";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/plants/$id")({
@@ -14,9 +15,12 @@ function PlantDetail() {
   const { id } = useParams({ from: "/_app/plants/$id" });
   const navigate = useNavigate();
   const plant = useApp((s) => s.plants.find(p => p.id === id));
-  const reminders = useApp((s) => s.reminders.filter(r => r.plantId === id));
   const detections = useApp((s) => s.detections.filter(d => d.plantId === id));
-  const markDone = useApp((s) => s.markReminderDone);
+  
+  const { data: allReminders = [], isLoading: isLoadingReminders, isError: isErrorReminders } = useReminders();
+  const { mutate: completeReminder } = useCompleteReminder();
+  const reminders = allReminders.filter((r: any) => String(r.plantId) === id && r.status !== "completed");
+  
   const deletePlant = useApp((s) => s.deletePlant);
   const [editOpen, setEditOpen] = useState(false);
   const [confirmDel, setConfirmDel] = useState(false);
@@ -47,11 +51,15 @@ function PlantDetail() {
 
       <section>
         <h2 className="font-display text-xl mb-3">Upcoming Care</h2>
-        {reminders.length === 0 ? (
+        {isLoadingReminders ? (
+          <div className="card-warm p-5 text-sm text-muted-foreground animate-pulse">Loading reminders...</div>
+        ) : isErrorReminders ? (
+          <div className="card-warm p-5 text-sm text-destructive">Failed to load reminders.</div>
+        ) : reminders.length === 0 ? (
           <div className="card-warm p-5 text-sm text-muted-foreground">No reminders yet. Add one from Reminders.</div>
         ) : (
           <ul className="space-y-2">
-            {reminders.map(r => {
+            {reminders.map((r: any) => {
               const Icon = icon(r.task);
               return (
                 <li key={r.id} className="card-warm p-4 flex items-center justify-between">
@@ -62,7 +70,7 @@ function PlantDetail() {
                       <p className="text-xs text-muted-foreground">Due {new Date(r.dueAt).toLocaleDateString()}</p>
                     </div>
                   </div>
-                  <button onClick={() => { markDone(r.id); toast.success(`${r.task} done! Next in 3 days.`); }} className="btn-ghost-border !py-1.5 !px-3 text-xs">Mark done</button>
+                  <button onClick={() => { completeReminder(r.id); toast.success(`${r.task} done! Scheduled next recurrence if applicable.`); }} className="btn-ghost-border !py-1.5 !px-3 text-xs">Mark done</button>
                 </li>
               );
             })}

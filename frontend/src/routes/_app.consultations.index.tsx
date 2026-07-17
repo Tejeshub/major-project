@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useApp } from "@/stores/app";
+import { useConsultations } from "@/hooks/useExperts";
 import { useState } from "react";
 import { Star } from "lucide-react";
 import { toast } from "sonner";
@@ -11,13 +11,21 @@ export const Route = createFileRoute("/_app/consultations/")({
 });
 
 function ConsultationsList() {
-  const items = useApp(s => s.consultations);
-  const cancel = useApp(s => s.cancelConsultation);
-  const review = useApp(s => s.reviewExpert);
+  const { data: items = [], isLoading, isError, refetch } = useConsultations();
+  // Stubbing cancel and review since backend endpoints aren't available in MVP yet
+  const cancel = (id: string) => toast.error("Cancellation will be supported in the next release.");
+  const review = (id: string, r: number, t: string) => toast.error("Reviews will be supported in the next release.");
   const [reviewing, setReviewing] = useState<string | null>(null);
   const [rating, setRating] = useState(5);
   const [text, setText] = useState("");
 
+  if (isLoading) return <div className="text-center py-20 text-muted-foreground animate-pulse">Loading your consultations...</div>;
+  if (isError) return (
+    <div className="text-center py-20 flex flex-col items-center gap-4">
+      <p className="text-muted-foreground">Unable to load consultations.</p>
+      <button onClick={() => refetch()} className="btn-ghost-border px-6 py-2">Retry</button>
+    </div>
+  );
   if (items.length === 0) return <EmptyState icon="💬" title="No consultations yet" action={<Link to="/experts" className="btn-rust">Browse experts →</Link>} />;
 
   const STATUS: Record<string, string> = {
@@ -32,7 +40,7 @@ function ConsultationsList() {
         <p className="eyebrow">Your sessions</p>
         <h1 className="font-display text-3xl md:text-4xl mt-1">My consultations</h1>
       </div>
-      {items.map(c => (
+      {items.map((c: any) => (
         <div key={c.id} className="card-warm p-4">
           <div className="flex items-center gap-3">
             <img src={c.expertAvatar} className="w-12 h-12 rounded-full bg-secondary" alt="" />
@@ -40,7 +48,7 @@ function ConsultationsList() {
               <p className="font-medium">{c.expertName}</p>
               <p className="text-xs text-muted-foreground">{c.specialisation} · {c.slot} · {c.mode}</p>
             </div>
-            <span className={`chip ${STATUS[c.status]}`}>{c.status}</span>
+            <span className={`chip ${STATUS[c.status] || STATUS.Pending}`}>{c.status}</span>
           </div>
           <div className="flex gap-2 mt-3 flex-wrap">
             {c.status === "Pending" && <button onClick={() => { cancel(c.id); toast.success("Cancelled"); }} className="btn-ghost-border !py-1.5 !px-3 text-xs">Cancel</button>}

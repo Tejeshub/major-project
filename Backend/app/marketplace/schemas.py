@@ -11,6 +11,8 @@ class ProductBase(BaseModel):
     stock: int = Field(..., ge=0, description="Available inventory count")
     gst_rate: int = Field(..., ge=0, le=100, description="GST rate percentage (e.g., 5, 12, 18)")
     image_url: Optional[str] = Field(None, max_length=500, description="Supabase storage path or URL")
+    description: Optional[str] = Field(None, max_length=2000, description="Detailed product description")
+    rating: float = Field(0.0, ge=0.0, le=5.0, description="Average rating")
 
 class ProductCreate(ProductBase):
     """Schema for POST /api/v1/products (Nursery role only)."""
@@ -24,12 +26,14 @@ class ProductUpdate(BaseModel):
     stock: Optional[int] = Field(None, ge=0)
     gst_rate: Optional[int] = Field(None, ge=0, le=100)
     image_url: Optional[str] = Field(None, max_length=500)
+    description: Optional[str] = Field(None, max_length=2000)
     is_active: Optional[bool] = Field(None, description="Set to false to soft-delete the product")
 
 class ProductResponse(ProductBase):
     """Schema for data returned to the client."""
     id: UUID
-    seller_id: str
+    seller: str
+    verified: bool
     is_active: bool
     created_at: datetime
     updated_at: datetime
@@ -59,6 +63,19 @@ class OrderItemResponse(BaseModel):
     
     model_config = ConfigDict(from_attributes=True)
 
+class OrderSummaryItem(BaseModel):
+    product_id: UUID
+    quantity: int
+    product: ProductResponse
+
+class OrderSummaryResponse(BaseModel):
+    items: list[OrderSummaryItem]
+    subtotal: int
+    gst: int
+    delivery: int
+    fee: int
+    total: int
+    
 class OrderResponse(BaseModel):
     """Schema for returning order details."""
     id: UUID

@@ -1,5 +1,5 @@
 import { createFileRoute, useParams, Link, useNavigate } from "@tanstack/react-router";
-import { SEED_EXPERTS } from "@/data/seed";
+import { useExpert, useBookConsultation } from "@/hooks/useExperts";
 import { useApp, useGates } from "@/stores/app";
 import { useState } from "react";
 import { Star, Check } from "lucide-react";
@@ -14,8 +14,8 @@ const SLOTS = ["Mon 10am", "Mon 4pm", "Tue 11am", "Wed 2pm", "Thu 4pm", "Fri 6pm
 
 function ExpertDetail() {
   const { id } = useParams({ from: "/_app/experts/$id" });
-  const expert = SEED_EXPERTS.find(e => e.id === id);
-  const book = useApp(s => s.bookConsultation);
+  const { data: expert, isLoading, isError, refetch } = useExpert(id);
+  const bookMutation = useBookConsultation();
   const { canBookExpert } = useGates();
   const navigate = useNavigate();
   const [slot, setSlot] = useState<string>("");
@@ -23,7 +23,14 @@ function ExpertDetail() {
   const [confirm, setConfirm] = useState(false);
   const [gate, setGate] = useState(false);
 
-  if (!expert) return <div className="text-center py-20">Expert not found.</div>;
+  if (isLoading) return <div className="text-center py-20 text-muted-foreground animate-pulse">Loading expert details...</div>;
+  if (isError || !expert) return (
+    <div className="text-center py-20 flex flex-col items-center gap-4">
+      <p className="text-muted-foreground">Unable to load expert details.</p>
+      <button onClick={() => refetch()} className="btn-ghost-border px-6 py-2">Retry</button>
+    </div>
+  );
+  
   const fee = 25;
   const total = expert.price + fee;
 
@@ -31,11 +38,18 @@ function ExpertDetail() {
     if (!canBookExpert) { setGate(true); return; }
     setConfirm(true);
   };
+  
   const finalize = () => {
-    book({ expertId: expert.id, expertName: expert.name, expertAvatar: expert.avatar, specialisation: expert.specialisation, slot, mode, price: expert.price });
-    setConfirm(false);
-    toast.success("Booked! Check your consultations.");
-    navigate({ to: "/consultations" });
+    bookMutation.mutate({ expert_id: expert.id, slot, mode }, {
+      onSuccess: () => {
+        setConfirm(false);
+        toast.success("Booked! Check your consultations.");
+        navigate({ to: "/consultations" });
+      },
+      onError: () => {
+        toast.error("Failed to book consultation. Please try again.");
+      }
+    });
   };
 
   return (
@@ -45,7 +59,7 @@ function ExpertDetail() {
         <div>
           <h1 className="font-display text-3xl">{expert.name}</h1>
           <p className="text-sm text-muted-foreground">{expert.specialisation} · {expert.city}</p>
-          <p className="text-sm mt-1"><Star className="w-4 h-4 inline text-amber-brand fill-amber-brand" /> {expert.rating} · {expert.consultations} consultations</p>
+          <p className="text-sm mt-1"><Star className="w-4 h-4 inline text-amber-brand fill-amber-brand" /> {expert.rating} · {expert.consultations_count} consultations</p>
         </div>
       </div>
 
@@ -53,7 +67,7 @@ function ExpertDetail() {
         <h3 className="font-display text-lg mb-2">About</h3>
         <p className="text-sm text-ink/80 whitespace-pre-line leading-relaxed">{expert.bio}</p>
         <div className="flex gap-2 flex-wrap mt-4">
-          {expert.tags.map(t => <span key={t} className="chip !bg-amber-soft text-ink">{t}</span>)}
+          {expert.tags?.map((t: string) => <span key={t} className="chip !bg-amber-soft text-ink">{t}</span>)}
         </div>
       </div>
 
@@ -95,7 +109,9 @@ function ExpertDetail() {
               <p>Mode: <span className="font-medium">{mode}</span></p>
               <p>Price: <span className="font-medium">₹{total}</span></p>
             </div>
-            <button onClick={finalize} className="btn-rust w-full mt-5">Yes, book it</button>
+            <button onClick={finalize} disabled={bookMutation.isPending} className="btn-rust w-full mt-5">
+              {bookMutation.isPending ? "Booking..." : "Yes, book it"}
+            </button>
             <button onClick={() => setConfirm(false)} className="text-xs text-muted-foreground mt-3 block mx-auto">Cancel</button>
           </div>
         </div>

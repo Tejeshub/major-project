@@ -1,10 +1,12 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useApp, useAllProducts } from "@/stores/app";
+import { useApp } from "@/stores/app";
+import { useOrderSummary, useCreateOrder } from "@/hooks/useMarketplace";
 import { useState } from "react";
 import confetti from "canvas-confetti";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { toast } from "sonner";
+import { Skeleton, EmptyState } from "@/components/ui-brand/primitives";
 
 export const Route = createFileRoute("/_app/checkout")({
   head: () => ({ meta: [{ title: "Checkout — PlantNest" }] }),
@@ -13,32 +15,48 @@ export const Route = createFileRoute("/_app/checkout")({
 
 function Checkout() {
   const navigate = useNavigate();
-  const products = useAllProducts();
   const cart = useApp(s => s.cart);
-  const placeOrder = useApp(s => s.placeOrder);
-  const items = cart.map(c => ({ qty: c.qty, product: products.find(p => p.id === c.productId)! })).filter(i => i.product);
+  const clearCart = useApp(s => s.clearCart);
 
-  const subtotal = items.reduce((s, i) => s + i.product.price * i.qty, 0);
-  const gst = Math.round(items.reduce((s, i) => s + i.product.price * i.qty * (i.product.gstRate / 100), 0));
-  const delivery = subtotal >= 999 || subtotal === 0 ? 0 : 49;
-  const fee = subtotal > 0 ? 20 : 0;
-  const total = subtotal + gst + delivery + fee;
+  const { data: summary, isLoading, error } = useOrderSummary(cart);
+  const createOrder = useCreateOrder();
 
   const [step, setStep] = useState(1);
   const [address, setAddress] = useState({ name: "", phone: "", line1: "", line2: "", city: "", pincode: "" });
   const [payment, setPayment] = useState<"UPI" | "Card" | "COD">("UPI");
   const [orderId, setOrderId] = useState<string>("");
 
-  if (items.length === 0 && step !== 3) {
+  if (cart.length === 0 && step !== 3) {
     return <div className="text-center py-20"><p>Cart empty.</p><Link to="/market" className="btn-rust mt-4 inline-flex">Shop →</Link></div>;
   }
 
-  const place = () => {
-    const order = placeOrder({ items, subtotal, gst, delivery, fee, total, address, payment });
-    setOrderId(order.id);
-    setStep(3);
-    confetti({ particleCount: 80, spread: 70, origin: { y: 0.4 }, colors: ["#c1532b", "#e8a33d", "#6f8f6a"] });
-    toast.success("Order placed 🌿");
+  if (isLoading && step !== 3) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-6">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-64 w-full card-warm" />
+      </div>
+    );
+  }
+
+  if ((error || !summary) && step !== 3) {
+    return <EmptyState icon="⚠️" title="Error" subtitle="Could not load checkout summary." />;
+  }
+
+  const place = async () => {
+    try {
+      // Backend expects product_id and quantity
+      const items = cart.map(c => ({ product_id: c.productId, quantity: c.qty }));
+      const order = await createOrder.mutateAsync({ items });
+      
+      setOrderId(order.id);
+      setStep(3);
+      clearCart();
+      confetti({ particleCount: 80, spread: 70, origin: { y: 0.4 }, colors: ["#c1532b", "#e8a33d", "#6f8f6a"] });
+      toast.success("Order placed 🌿");
+    } catch (e: any) {
+      toast.error(e.message || "Failed to place order.");
+    }
   };
 
   return (
@@ -69,9 +87,9 @@ function Checkout() {
         </div>
       )}
 
-      {step === 2 && (
+      {step === 2 && summary && (
         <div className="card-warm p-6 space-y-4">
-          <div className="bg-amber-soft/60 p-3 rounded-lg text-xs text-ink">⚠️ Test/Sandbox mode — no real payments</div>
+          <div className="bg-amber-soft/60 p-3 rounded-lg text-xs text-ink">⚠️ Test/Sandbox mode — no real payments (Razorpay integration simulated via backend)</div>
           <h2 className="font-display text-2xl">Payment</h2>
           <div className="grid grid-cols-3 gap-2">
             {(["UPI", "Card", "COD"] as const).map(p => (
@@ -92,8 +110,10 @@ function Checkout() {
               <div className="flex gap-3"><input className="input-warm" placeholder="MM/YY" /><input className="input-warm" placeholder="CVV" /></div>
             </>
           )}
-          {payment === "COD" && <label className="flex gap-2 text-sm"><input type="checkbox" defaultChecked /> I'll pay ₹{total} on delivery.</label>}
-          <button onClick={place} className="btn-rust w-full">Place order — ₹{total} →</button>
+          {payment === "COD" && <label className="flex gap-2 text-sm"><input type="checkbox" defaultChecked /> I'll pay ₹{summary.total / 100} on delivery.</label>}
+          <button onClick={place} disabled={createOrder.isPending} className="btn-rust w-full">
+            {createOrder.isPending ? "Placing order..." : `Place order — ₹${summary.total / 100} →`}
+          </button>
         </div>
       )}
 
@@ -106,14 +126,15 @@ function Checkout() {
           <h1 className="font-display text-3xl mt-6">Order placed successfully!</h1>
           <p className="text-muted-foreground mt-2">Your plants are on their way 🌿</p>
           <p className="text-xs text-muted-foreground mt-1">Order #{orderId}</p>
-          <div className="card-warm p-5 max-w-sm mx-auto mt-6 text-left text-sm">
-            {items.map(i => <div key={i.product.id} className="flex justify-between py-1"><span>{i.product.name} × {i.qty}</span><span>₹{i.product.price * i.qty}</span></div>)}
-            <div className="divider-warm my-2" />
-            <div className="flex justify-between font-semibold"><span>Total</span><span>₹{total}</span></div>
-          </div>
+          {summary && (
+            <div className="card-warm p-5 max-w-sm mx-auto mt-6 text-left text-sm">
+              {summary.items.map((i: any) => <div key={i.product.id} className="flex justify-between py-1"><span>{i.product.name} × {i.quantity}</span><span>₹{(i.product.price * i.quantity) / 100}</span></div>)}
+              <div className="divider-warm my-2" />
+              <div className="flex justify-between font-semibold"><span>Total</span><span>₹{summary.total / 100}</span></div>
+            </div>
+          )}
           <div className="flex gap-3 justify-center mt-6">
-            <Link to="/orders/$id" params={{ id: orderId }} className="btn-rust">Track order</Link>
-            <Link to="/market" className="btn-ghost-border">Continue shopping</Link>
+            <Link to="/market" className="btn-rust">Continue shopping</Link>
           </div>
         </div>
       )}

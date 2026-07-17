@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useApp, useAllProducts } from "@/stores/app";
+import { useApp } from "@/stores/app";
+import { useProducts } from "@/hooks/useMarketplace";
+import { Skeleton, EmptyState } from "@/components/ui-brand/primitives";
 import { useState } from "react";
 import { Search, ShoppingBag, BadgeCheck } from "lucide-react";
 import { toast } from "sonner";
@@ -12,12 +14,16 @@ export const Route = createFileRoute("/_app/market/")({
 });
 
 function Market() {
-  const products = useAllProducts();
   const addToCart = useApp(s => s.addToCart);
   const [cat, setCat] = useState<typeof CATS[number]>("All");
   const [q, setQ] = useState("");
 
-  const list = products.filter(p => (cat === "All" || p.category === cat) && (q === "" || p.name.toLowerCase().includes(q.toLowerCase())));
+  const { data, isLoading, error } = useProducts({ 
+    category: cat === "All" ? undefined : cat, 
+    keyword: q || undefined 
+  });
+
+  const list = data?.items || [];
 
   return (
     <div className="space-y-6">
@@ -34,24 +40,55 @@ function Market() {
           <button key={c} onClick={() => setCat(c)} className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition ${cat === c ? "bg-rust text-white" : "bg-secondary text-ink/70"}`}>{c}</button>
         ))}
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {list.map(p => (
-          <Link key={p.id} to="/market/product/$id" params={{ id: p.id }} className="card-warm card-warm-hover overflow-hidden block group">
-            <div className="aspect-square bg-secondary relative">
-              <img src={p.image} alt={p.name} className="w-full h-full object-cover" loading="lazy" />
-              {p.stock === 0 && <div className="absolute inset-0 bg-ink/40 flex items-center justify-center"><span className="chip !bg-card">Out of stock</span></div>}
-            </div>
-            <div className="p-3">
-              <p className="text-xs text-muted-foreground flex items-center gap-1">{p.seller} {p.verified && <BadgeCheck className="w-3.5 h-3.5 text-amber-brand" />}</p>
-              <p className="font-medium text-sm line-clamp-1 mt-0.5">{p.name}</p>
-              <div className="flex justify-between items-center mt-2">
-                <p className="font-display text-lg text-rust">₹{p.price}</p>
-                <button onClick={e => { e.preventDefault(); if (p.stock === 0) { toast.info("Out of stock — we'll notify you"); return; } addToCart(p.id); toast.success("Added to cart"); }} className="w-8 h-8 rounded-full bg-rust text-white flex items-center justify-center hover:scale-110 transition"><ShoppingBag className="w-4 h-4" /></button>
+      
+      {isLoading ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="card-warm overflow-hidden block">
+              <Skeleton className="w-full aspect-square" />
+              <div className="p-3 space-y-2">
+                <Skeleton className="h-3 w-1/2" />
+                <Skeleton className="h-4 w-3/4" />
+                <div className="flex justify-between items-center mt-2">
+                  <Skeleton className="h-5 w-1/3" />
+                  <Skeleton className="w-8 h-8 rounded-full" />
+                </div>
               </div>
             </div>
-          </Link>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : error ? (
+        <EmptyState 
+          icon="⚠️" 
+          title="Failed to load products" 
+          subtitle={(error as Error).message || "Please check your connection and try again."} 
+        />
+      ) : list.length === 0 ? (
+        <EmptyState 
+          icon="🛒" 
+          title="No products found" 
+          subtitle="Try adjusting your search or category filters." 
+        />
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {list.map((p: any) => (
+            <Link key={p.id} to="/market/product/$id" params={{ id: p.id }} className="card-warm card-warm-hover overflow-hidden block group">
+              <div className="aspect-square bg-secondary relative">
+                <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" loading="lazy" />
+                {p.stock === 0 && <div className="absolute inset-0 bg-ink/40 flex items-center justify-center"><span className="chip !bg-card">Out of stock</span></div>}
+              </div>
+              <div className="p-3">
+                <p className="text-xs text-muted-foreground flex items-center gap-1">{p.seller} {p.verified && <BadgeCheck className="w-3.5 h-3.5 text-amber-brand" />}</p>
+                <p className="font-medium text-sm line-clamp-1 mt-0.5">{p.name}</p>
+                <div className="flex justify-between items-center mt-2">
+                  <p className="font-display text-lg text-rust">₹{p.price / 100}</p>
+                  <button onClick={e => { e.preventDefault(); if (p.stock === 0) { toast.info("Out of stock — we'll notify you"); return; } addToCart(p.id); toast.success("Added to cart"); }} className="w-8 h-8 rounded-full bg-rust text-white flex items-center justify-center hover:scale-110 transition"><ShoppingBag className="w-4 h-4" /></button>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

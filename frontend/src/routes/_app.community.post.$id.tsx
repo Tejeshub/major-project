@@ -1,7 +1,7 @@
 import { createFileRoute, useParams, Link } from "@tanstack/react-router";
-import { useApp } from "@/stores/app";
+import { usePosts, useToggleLike, useAddComment } from "@/hooks/useCommunity";
 import { Heart, ArrowLeft, Send } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 export const Route = createFileRoute("/_app/community/post/$id")({
@@ -10,12 +10,33 @@ export const Route = createFileRoute("/_app/community/post/$id")({
 
 function PostDetail() {
   const { id } = useParams({ from: "/_app/community/post/$id" });
-  const post = useApp(s => s.posts.find(p => p.id === id));
-  const toggleLike = useApp(s => s.toggleLike);
-  const addComment = useApp(s => s.addComment);
   const [text, setText] = useState("");
 
-  if (!post) return <div className="text-center py-20">Post not found.</div>;
+  const { data: posts = [], isLoading, isError, refetch } = usePosts();
+  const toggleLikeMut = useToggleLike();
+  const addCommentMut = useAddComment();
+
+  const post = posts.find((p) => p.id === id);
+
+  const toggleLike = (postId: string) => {
+    if (post) toggleLikeMut.mutate({ postId, liked: !post.liked });
+  };
+
+  const addComment = (postId: string, commentText: string) => {
+    if (commentText.trim() && !addCommentMut.isPending) {
+      addCommentMut.mutate({ postId, text: commentText });
+      setText("");
+    }
+  };
+
+  if (isLoading) return <div className="text-center py-20 animate-pulse text-muted-foreground">Loading post...</div>;
+  if (isError) return (
+    <div className="max-w-xl mx-auto py-20 text-center flex flex-col items-center gap-4">
+      <p className="text-muted-foreground">Unable to load the post right now.</p>
+      <button onClick={() => refetch()} className="btn-ghost-border px-6 py-2">Retry</button>
+    </div>
+  );
+  if (!post) return <div className="text-center py-20 text-muted-foreground">Post not found.</div>;
 
   return (
     <div className="max-w-2xl mx-auto">

@@ -24,7 +24,7 @@ function AppShell() {
   const user = useApp((s) => s.user);
   
   // If we are waiting for OAuth to resolve, show a loading state instead of a blank screen
-  if (!user && window.location.hash.includes("access_token")) {
+  if (!user && typeof window !== "undefined" && window.location.hash.includes("access_token")) {
     return <div className="min-h-screen flex items-center justify-center">Loading your profile...</div>;
   }
   

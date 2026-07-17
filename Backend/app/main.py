@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.settings import settings
 
 app = FastAPI(
+
     title="PlantNest API",
     description="Backend API for PlantNest",
     version="1.0.0",
@@ -11,8 +12,21 @@ app = FastAPI(
 
 from app.auth.router import router as auth_router
 from app.plants.router import router as plants_router
+from app.marketplace.router import router as marketplace_router
+from app.community.router import router as community_router
+from app.experts.router import router as experts_router
+from app.reminders.router import router as reminders_router
+from app.notifications.router import router as notifications_router
+from app.support.router import router as support_router
+
 app.include_router(auth_router)
 app.include_router(plants_router)
+app.include_router(marketplace_router)
+app.include_router(community_router)
+app.include_router(experts_router)
+app.include_router(reminders_router)
+app.include_router(notifications_router)
+app.include_router(support_router)
 
 # Configure CORS
 app.add_middleware(
@@ -26,6 +40,8 @@ app.add_middleware(
 # Global exception handler
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
+    import traceback
+    traceback.print_exc()
     # In a real app, you would log the exception and parse specific FastAPI exceptions.
     # We are returning a standard format as requested.
     return JSONResponse(

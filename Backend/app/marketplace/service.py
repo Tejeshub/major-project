@@ -1,7 +1,8 @@
-from uuid import UUID
+from uuid import UUID, uuid4
 from typing import Optional, Any
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 import os
 import hmac
@@ -63,8 +64,81 @@ async def get_products(
         category=category, 
         keyword=keyword
     )
+    
+    # Inject composite fields as per user rule 2 (temporary placeholder until User join is implemented)
+    for item in items:
+        item.seller = "PlantNest Partner"
+        item.verified = True
+        
     return list(items), total
 
+
+async def get_product_by_id(db: AsyncSession, product_id: UUID) -> Product:
+    """Business logic for fetching a single product."""
+    product = await repository.get_product_by_id(db, product_id)
+    if not product:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+        
+    # Inject composite fields as per user rule 2
+    product.seller = "PlantNest Partner"
+    product.verified = True
+    return product
+
+async def get_order_summary(db: AsyncSession, order_in: OrderCreate) -> dict[str, Any]:
+    """Calculate the checkout totals dynamically without creating an order."""
+    if not order_in.items:
+        return {"items": [], "subtotal": 0, "gst": 0, "delivery": 0, "fee": 0, "total": 0}
+        
+    requested_items = {item.product_id: item.quantity for item in order_in.items}
+    product_ids = list(requested_items.keys())
+    
+    # We do NOT lock rows for summary, just fetch them normally
+    stmt = select(Product).where(Product.id.in_(product_ids))
+    result = await db.execute(stmt)
+    products = result.scalars().all()
+    
+    product_map = {p.id: p for p in products}
+    
+    subtotal = 0
+    gst = 0
+    summary_items = []
+    
+    for item in order_in.items:
+        product = product_map.get(item.product_id)
+        if not product:
+            continue
+            
+        # Inject dummy seller fields to satisfy ProductResponse
+        product.seller = "PlantNest Partner"
+        product.verified = True
+            
+        qty = item.quantity
+        item_base = product.price * qty
+        item_gst = (item_base * product.gst_rate) // 100
+        
+        subtotal += item_base
+        gst += item_gst
+        summary_items.append({
+            "product_id": item.product_id,
+            "quantity": qty,
+            "product": product
+        })
+        
+    # Apply delivery and platform fee math as per the frontend logic
+    # (Delivery: Free if >= 999 INR (99900 paise), else 49 INR (4900 paise))
+    delivery = 0 if (subtotal >= 99900 or subtotal == 0) else 4900
+    fee = 2000 if subtotal > 0 else 0 # 20 INR fee
+    
+    total = subtotal + gst + delivery + fee
+    
+    return {
+        "items": summary_items,
+        "subtotal": subtotal,
+        "gst": gst,
+        "delivery": delivery,
+        "fee": fee,
+        "total": total
+    }
 
 async def search_products_for_ai(
     db: AsyncSession, 
@@ -87,7 +161,6 @@ async def search_products_for_ai(
         }
         for item in items
     ]
-
 
 async def create_order(
     db: AsyncSession, 
@@ -164,7 +237,6 @@ async def create_order(
         # 5. Save and commit transaction
         created_order = await repository.create_order(db, new_order)
         await db.commit()
-        await db.refresh(created_order)
         return created_order
 
     except HTTPException:
@@ -173,9 +245,11 @@ async def create_order(
         raise
     except Exception as e:
         await db.rollback()
+        import traceback
+        traceback.print_exc()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to process checkout."
+            detail=f"Failed to process checkout: {str(e)}"
         )
 
 
@@ -260,7 +334,6 @@ async def verify_payment(
             new_status="paid"
         )
         await db.commit()
-        await db.refresh(updated_order)
         
         # TODO: Trigger BackgroundTask to call notifications.service.send_notification(updated_order)
         

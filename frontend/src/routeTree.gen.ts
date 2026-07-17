@@ -13,10 +13,12 @@ import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppSupportRouteImport } from './routes/_app.support'
 import { Route as AppSubscriptionRouteImport } from './routes/_app.subscription'
 import { Route as AppSellerRouteImport } from './routes/_app.seller'
 import { Route as AppRemindersRouteImport } from './routes/_app.reminders'
 import { Route as AppProfileRouteImport } from './routes/_app.profile'
+import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppCheckoutRouteImport } from './routes/_app.checkout'
 import { Route as AppCartRouteImport } from './routes/_app.cart'
@@ -59,6 +61,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppSupportRoute = AppSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSubscriptionRoute = AppSubscriptionRouteImport.update({
   id: '/subscription',
   path: '/subscription',
@@ -77,6 +84,11 @@ const AppRemindersRoute = AppRemindersRouteImport.update({
 const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNotificationsRoute = AppNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => AppRoute,
 } as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
@@ -197,10 +209,12 @@ export interface FileRoutesByFullPath {
   '/cart': typeof AppCartRoute
   '/checkout': typeof AppCheckoutRoute
   '/dashboard': typeof AppDashboardRoute
+  '/notifications': typeof AppNotificationsRoute
   '/profile': typeof AppProfileRoute
   '/reminders': typeof AppRemindersRoute
   '/seller': typeof AppSellerRouteWithChildren
   '/subscription': typeof AppSubscriptionRoute
+  '/support': typeof AppSupportRoute
   '/detect/history': typeof AppDetectHistoryRoute
   '/experts/$id': typeof AppExpertsIdRoute
   '/learn/$slug': typeof AppLearnSlugRoute
@@ -228,9 +242,11 @@ export interface FileRoutesByTo {
   '/cart': typeof AppCartRoute
   '/checkout': typeof AppCheckoutRoute
   '/dashboard': typeof AppDashboardRoute
+  '/notifications': typeof AppNotificationsRoute
   '/profile': typeof AppProfileRoute
   '/reminders': typeof AppRemindersRoute
   '/subscription': typeof AppSubscriptionRoute
+  '/support': typeof AppSupportRoute
   '/detect/history': typeof AppDetectHistoryRoute
   '/experts/$id': typeof AppExpertsIdRoute
   '/learn/$slug': typeof AppLearnSlugRoute
@@ -260,10 +276,12 @@ export interface FileRoutesById {
   '/_app/cart': typeof AppCartRoute
   '/_app/checkout': typeof AppCheckoutRoute
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/notifications': typeof AppNotificationsRoute
   '/_app/profile': typeof AppProfileRoute
   '/_app/reminders': typeof AppRemindersRoute
   '/_app/seller': typeof AppSellerRouteWithChildren
   '/_app/subscription': typeof AppSubscriptionRoute
+  '/_app/support': typeof AppSupportRoute
   '/_app/detect/history': typeof AppDetectHistoryRoute
   '/_app/experts/$id': typeof AppExpertsIdRoute
   '/_app/learn/$slug': typeof AppLearnSlugRoute
@@ -293,10 +311,12 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/dashboard'
+    | '/notifications'
     | '/profile'
     | '/reminders'
     | '/seller'
     | '/subscription'
+    | '/support'
     | '/detect/history'
     | '/experts/$id'
     | '/learn/$slug'
@@ -324,9 +344,11 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/dashboard'
+    | '/notifications'
     | '/profile'
     | '/reminders'
     | '/subscription'
+    | '/support'
     | '/detect/history'
     | '/experts/$id'
     | '/learn/$slug'
@@ -355,10 +377,12 @@ export interface FileRouteTypes {
     | '/_app/cart'
     | '/_app/checkout'
     | '/_app/dashboard'
+    | '/_app/notifications'
     | '/_app/profile'
     | '/_app/reminders'
     | '/_app/seller'
     | '/_app/subscription'
+    | '/_app/support'
     | '/_app/detect/history'
     | '/_app/experts/$id'
     | '/_app/learn/$slug'
@@ -417,6 +441,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/support': {
+      id: '/_app/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof AppSupportRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/subscription': {
       id: '/_app/subscription'
       path: '/subscription'
@@ -443,6 +474,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/notifications': {
+      id: '/_app/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AppNotificationsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/dashboard': {
@@ -622,10 +660,12 @@ interface AppRouteChildren {
   AppCartRoute: typeof AppCartRoute
   AppCheckoutRoute: typeof AppCheckoutRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppNotificationsRoute: typeof AppNotificationsRoute
   AppProfileRoute: typeof AppProfileRoute
   AppRemindersRoute: typeof AppRemindersRoute
   AppSellerRoute: typeof AppSellerRouteWithChildren
   AppSubscriptionRoute: typeof AppSubscriptionRoute
+  AppSupportRoute: typeof AppSupportRoute
   AppDetectHistoryRoute: typeof AppDetectHistoryRoute
   AppExpertsIdRoute: typeof AppExpertsIdRoute
   AppLearnSlugRoute: typeof AppLearnSlugRoute
@@ -648,10 +688,12 @@ const AppRouteChildren: AppRouteChildren = {
   AppCartRoute: AppCartRoute,
   AppCheckoutRoute: AppCheckoutRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppNotificationsRoute: AppNotificationsRoute,
   AppProfileRoute: AppProfileRoute,
   AppRemindersRoute: AppRemindersRoute,
   AppSellerRoute: AppSellerRouteWithChildren,
   AppSubscriptionRoute: AppSubscriptionRoute,
+  AppSupportRoute: AppSupportRoute,
   AppDetectHistoryRoute: AppDetectHistoryRoute,
   AppExpertsIdRoute: AppExpertsIdRoute,
   AppLearnSlugRoute: AppLearnSlugRoute,

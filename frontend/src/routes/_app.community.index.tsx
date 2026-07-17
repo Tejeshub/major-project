@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useRouterState } from "@tanstack/react-router";
 import { useApp } from "@/stores/app";
-import { useState } from "react";
+import { usePosts, useCreatePost, useToggleLike } from "@/hooks/useCommunity";
+import { useState, useEffect } from "react";
 import { Heart, MessageCircle, Share2, Plus, X, MapPin as MapPinIcon, List } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -29,24 +30,43 @@ function Community() {
 }
 
 function Feed() {
-  const posts = useApp(s => s.posts);
-  const toggleLike = useApp(s => s.toggleLike);
-  const addPost = useApp(s => s.addPost);
   const user = useApp(s => s.user);
   const [composerOpen, setComposerOpen] = useState(false);
   const [draft, setDraft] = useState({ caption: "", image: "" });
+  
+  const { data: posts = [], isLoading, isError, refetch } = usePosts();
+  const createPost = useCreatePost();
+  const toggleLikeMut = useToggleLike();
+
+  const toggleLike = (postId: string) => {
+    const post = posts.find((p) => p.id === postId);
+    if (post) toggleLikeMut.mutate({ postId, liked: !post.liked });
+  };
 
   const submit = () => {
-    if (!user || !draft.caption.trim()) return;
-    addPost({
-      user: user.name, avatar: user.avatar, city: "Mumbai",
+    if (!user || !draft.caption.trim() || createPost.isPending) return;
+    createPost.mutate({
       image: draft.image || "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&w=900&q=70",
       caption: draft.caption,
+    }, {
+      onSuccess: () => {
+        setDraft({ caption: "", image: "" });
+        setComposerOpen(false);
+        toast.success("Posted 🌿");
+      }
     });
-    setDraft({ caption: "", image: "" });
-    setComposerOpen(false);
-    toast.success("Posted 🌿");
   };
+
+  if (isLoading) return <div className="max-w-xl mx-auto py-20 text-center text-muted-foreground animate-pulse">Loading community feed...</div>;
+  
+  if (isError) return (
+    <div className="max-w-xl mx-auto py-20 text-center flex flex-col items-center gap-4">
+      <p className="text-muted-foreground">Unable to load the community feed right now.</p>
+      <button onClick={() => refetch()} className="btn-ghost-border px-6 py-2">Retry</button>
+    </div>
+  );
+
+  if (posts.length === 0) return <div className="max-w-xl mx-auto py-20 text-center text-muted-foreground">No posts yet. Be the first to share!</div>;
 
   return (
     <div className="max-w-xl mx-auto space-y-4">

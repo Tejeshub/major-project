@@ -23,7 +23,7 @@ function Profile() {
   const plan = useApp(s => s.plan);
   const plants = useApp(s => s.plants);
   const detections = useApp(s => s.detections);
-  const posts = useApp(s => s.posts);
+  const posts: any[] = []; // Mock posts since it's not implemented yet
   const settings = useApp(s => s.settings);
   const updateSettings = useApp(s => s.updateSettings);
   const logout = useApp(s => s.logout);
@@ -64,7 +64,7 @@ function Profile() {
       </div>
 
       <div className="grid grid-cols-3 gap-3 text-center">
-        {[{ n: plants.length, l: "Plants" }, { n: detections.length, l: "Detections" }, { n: posts.filter(p => p.user === user.name).length, l: "Posts" }].map(s => (
+        {[{ n: plants.length, l: "Plants" }, { n: detections.length, l: "Detections" }, { n: posts.filter((p: any) => p.user === user.name).length, l: "Posts" }].map((s: any) => (
           <div key={s.l} className="card-warm p-4">
             <p className="font-display text-2xl text-rust">{s.n}</p>
             <p className="eyebrow !text-ink/55">{s.l}</p>

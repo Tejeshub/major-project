@@ -1,5 +1,7 @@
 import { createFileRoute, useParams, Link } from "@tanstack/react-router";
-import { useApp, useAllProducts } from "@/stores/app";
+import { useApp } from "@/stores/app";
+import { useProduct } from "@/hooks/useMarketplace";
+import { Skeleton, EmptyState } from "@/components/ui-brand/primitives";
 import { useState } from "react";
 import { BadgeCheck, Star, Minus, Plus, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
@@ -10,16 +12,40 @@ export const Route = createFileRoute("/_app/market/product/$id")({
 
 function Product() {
   const { id } = useParams({ from: "/_app/market/product/$id" });
-  const products = useAllProducts();
-  const product = products.find(p => p.id === id);
+  const { data: product, isLoading, error } = useProduct(id);
+  
   const addToCart = useApp(s => s.addToCart);
   const [qty, setQty] = useState(1);
   const [photo, setPhoto] = useState(0);
 
-  if (!product) return <div className="text-center py-20">Product not found.</div>;
-  const gst = Math.round((product.price * product.gstRate) / 100);
-  const total = product.price + gst;
-  const photos = [product.image, product.image, product.image];
+  if (isLoading) {
+    return (
+      <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8 pb-24 md:pb-0">
+        <Skeleton className="w-full aspect-square" />
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-1/4" />
+          <Skeleton className="h-10 w-3/4" />
+          <Skeleton className="h-8 w-1/4" />
+          <Skeleton className="h-24 w-full" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <EmptyState 
+        icon="⚠️" 
+        title="Product not found" 
+        subtitle="This product may have been removed or is currently unavailable."
+      />
+    );
+  }
+
+  const priceInRupees = product.price / 100;
+  const gst = Math.round((priceInRupees * product.gst_rate) / 100);
+  const total = priceInRupees + gst;
+  const photos = [product.image_url, product.image_url, product.image_url];
 
   return (
     <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8 pb-24 md:pb-0">
@@ -39,8 +65,8 @@ function Product() {
       <div>
         <span className="chip">{product.category}</span>
         <h1 className="font-display text-3xl md:text-4xl mt-2">{product.name}</h1>
-        <p className="font-display text-3xl text-rust mt-3">₹{product.price}</p>
-        <p className="text-xs text-muted-foreground">₹{product.price} + ₹{gst} GST = ₹{total} total</p>
+        <p className="font-display text-3xl text-rust mt-3">₹{priceInRupees}</p>
+        <p className="text-xs text-muted-foreground">₹{priceInRupees} + ₹{gst} GST = ₹{total} total</p>
 
         <div className="card-warm p-3 flex items-center gap-3 mt-5">
           <div className="w-10 h-10 rounded-full bg-amber-soft flex items-center justify-center"><BadgeCheck className="w-5 h-5 text-rust" /></div>

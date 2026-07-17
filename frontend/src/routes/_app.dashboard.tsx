@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useApp, useGates } from "@/stores/app";
-import { PLANT_PHOTOS, SEED_POSTS } from "@/data/seed";
+import { usePosts } from "@/hooks/useCommunity";
+import { useReminders } from "@/hooks/useReminders";
+import { PLANT_PHOTOS } from "@/data/seed";
 import { Camera, History, ShoppingBag, Cloud, Droplets, Plus } from "lucide-react";
 import { useState } from "react";
 import { AddPlantModal } from "@/components/AddPlantModal";
@@ -20,7 +22,10 @@ function greeting() {
 function Dashboard() {
   const user = useApp((s) => s.user);
   const plants = useApp((s) => s.plants);
-  const reminders = useApp((s) => s.reminders);
+  const { data: reminders = [] } = useReminders();
+  
+  const { data: posts = [], isLoading: isLoadingPosts, isError: isErrorPosts } = usePosts();
+  
   const { canAddPlant } = useGates();
   const [addOpen, setAddOpen] = useState(false);
 
@@ -50,7 +55,7 @@ function Dashboard() {
         {[
           { to: "/detect", icon: Camera, label: "Detect Disease" },
           { to: "/detect/history", icon: History, label: "View History" },
-          { to: "/market", icon: ShoppingBag, label: "Shop Products" },
+          { to: "/reminders", icon: Droplets, label: "Manage Reminders" },
         ].map(({ to, icon: Icon, label }) => (
           <Link key={to} to={to} className="card-warm card-warm-hover p-4 md:p-5 flex flex-col items-center text-center gap-2">
             <div className="w-10 h-10 rounded-xl bg-rust-soft/30 flex items-center justify-center"><Icon className="w-5 h-5 text-rust" /></div>
@@ -58,6 +63,50 @@ function Dashboard() {
           </Link>
         ))}
       </div>
+
+      {/* Reminders Overview */}
+      <section>
+        <div className="flex items-end justify-between mb-4">
+          <h2 className="font-display text-2xl">Reminders Overview</h2>
+          <Link to="/reminders" className="text-sm text-rust font-medium flex items-center gap-1">View All →</Link>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {(() => {
+            const now = new Date();
+            const tomorrow = new Date(now.getTime() + 86400000);
+            const overdue = reminders.filter(r => new Date(r.dueAt) < now && new Date(r.dueAt).toDateString() !== now.toDateString());
+            const today = reminders.filter(r => new Date(r.dueAt).toDateString() === now.toDateString() && r.status !== "completed");
+            const upcoming = reminders.filter(r => new Date(r.dueAt) >= tomorrow && r.status !== "completed");
+            
+            return (
+              <>
+                <div className="card-warm p-4 flex flex-col justify-between border-l-4 border-rust">
+                  <div>
+                    <p className="text-sm font-medium text-rust mb-1">Overdue</p>
+                    <p className="font-display text-3xl">{overdue.length}</p>
+                  </div>
+                  {overdue.length > 0 && <p className="text-xs text-muted-foreground mt-3">Needs immediate attention</p>}
+                </div>
+                <div className="card-warm p-4 flex flex-col justify-between border-l-4 border-amber-brand">
+                  <div>
+                    <p className="text-sm font-medium text-amber-brand mb-1">Due Today</p>
+                    <p className="font-display text-3xl">{today.length}</p>
+                  </div>
+                  {today.length > 0 && <p className="text-xs text-muted-foreground mt-3">Scheduled for today</p>}
+                </div>
+                <div className="card-warm p-4 flex flex-col justify-between border-l-4 border-indigo-dusk">
+                  <div>
+                    <p className="text-sm font-medium text-indigo-dusk mb-1">Upcoming</p>
+                    <p className="font-display text-3xl">{upcoming.length}</p>
+                  </div>
+                  {upcoming.length > 0 && <p className="text-xs text-muted-foreground mt-3">Later this week</p>}
+                </div>
+              </>
+            );
+          })()}
+        </div>
+      </section>
 
       {/* My Plants */}
       <section>
@@ -74,7 +123,7 @@ function Dashboard() {
         ) : (
           <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 snap-x">
             {plants.map((p) => {
-              const due = reminders.find(r => r.plantId === p.id && new Date(r.dueAt) <= new Date(Date.now() + 86400000));
+              const due = reminders.find(r => String(r.plantId) === String(p.id) && new Date(r.dueAt) <= new Date(Date.now() + 86400000));
               return (
                 <Link key={p.id} to="/plants/$id" params={{ id: p.id }} className="snap-start card-warm card-warm-hover p-4 min-w-[160px]">
                   <div className="w-24 h-24 mx-auto rounded-full overflow-hidden bg-secondary mb-3">
@@ -96,20 +145,29 @@ function Dashboard() {
           <h2 className="font-display text-2xl">Community Highlights</h2>
           <Link to="/community" className="text-sm text-rust">See all →</Link>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {SEED_POSTS.slice(0, 3).map((p) => (
-            <Link key={p.id} to="/community/post/$id" params={{ id: p.id }} className="card-warm card-warm-hover overflow-hidden">
-              <img src={p.image} alt="" className="w-full aspect-video object-cover" loading="lazy" />
-              <div className="p-4">
-                <div className="flex items-center gap-2">
-                  <img src={p.avatar} className="w-7 h-7 rounded-full" alt="" />
-                  <span className="text-sm font-medium">{p.user}</span>
+        
+        {isLoadingPosts ? (
+          <div className="text-sm text-muted-foreground animate-pulse">Loading community highlights...</div>
+        ) : isErrorPosts ? (
+          <div className="text-sm text-muted-foreground">Unable to load highlights.</div>
+        ) : posts.length === 0 ? (
+          <div className="text-sm text-muted-foreground">No posts to highlight.</div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {posts.slice(0, 3).map((p) => (
+              <Link key={p.id} to="/community/post/$id" params={{ id: p.id }} className="card-warm card-warm-hover overflow-hidden">
+                <img src={p.image} alt="" className="w-full aspect-video object-cover" loading="lazy" />
+                <div className="p-4">
+                  <div className="flex items-center gap-2">
+                    <img src={p.avatar} className="w-7 h-7 rounded-full" alt="" />
+                    <span className="text-sm font-medium">{p.user}</span>
+                  </div>
+                  <p className="text-sm text-ink/75 mt-2 line-clamp-2">{p.caption}</p>
                 </div>
-                <p className="text-sm text-ink/75 mt-2 line-clamp-2">{p.caption}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
 
       <AddPlantModal open={addOpen} onClose={() => setAddOpen(false)} />

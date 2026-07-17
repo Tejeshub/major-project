@@ -80,29 +80,6 @@ export const SEED_PRODUCTS: Product[] = [
 
 const avatar = (seed: string) => `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}&backgroundColor=f6dba0,e7b9a3,f0e8da`;
 
-export type Expert = {
-  id: string;
-  name: string;
-  avatar: string;
-  specialisation: string;
-  rating: number;
-  consultations: number;
-  price: number;
-  bio: string;
-  tags: string[];
-  city: string;
-};
-
-export const SEED_EXPERTS: Expert[] = [
-  { id: "e1", name: "Anjali Mehta", avatar: avatar("Anjali"), specialisation: "Ornamental Plants", rating: 4.9, consultations: 412, price: 299, bio: "Horticulturist with 12 years guiding urban balconies across Mumbai. I help you turn small spaces into lush green corners.\n\nI specialize in tropical foliage, indoor air-purifiers, and balcony composting setups.", tags: ["Indoor plants", "Air purifiers", "Balcony design"], city: "Mumbai" },
-  { id: "e2", name: "Ravi Iyer", avatar: avatar("Ravi"), specialisation: "Pest Control", rating: 4.8, consultations: 318, price: 199, bio: "Organic pest control consultant. I keep your harvest safe without harsh chemicals.\n\nNeem-based regimens, integrated pest management for balconies.", tags: ["Pest control", "Organic", "Disease diagnosis"], city: "Bengaluru" },
-  { id: "e3", name: "Dr. Priya Sharma", avatar: avatar("Priya"), specialisation: "Vegetables & Herbs", rating: 4.9, consultations: 521, price: 399, bio: "PhD in plant pathology. I help home growers maximize yield from small spaces.\n\nGrowing your own food shouldn't be hard — let me design a plan for your balcony.", tags: ["Vegetables", "Herbs", "Hydroponics"], city: "Pune" },
-  { id: "e4", name: "Karthik Reddy", avatar: avatar("Karthik"), specialisation: "Soil & Composting", rating: 4.7, consultations: 287, price: 249, bio: "Composting evangelist. Helping urban Indians close the loop on kitchen waste.\n\nVermicomposting setups, soil rejuvenation, and balcony bin design.", tags: ["Composting", "Soil health", "Sustainability"], city: "Hyderabad" },
-  { id: "e5", name: "Meera Nair", avatar: avatar("Meera"), specialisation: "Landscape Design", rating: 4.8, consultations: 196, price: 599, bio: "Landscape architect turned balcony designer. I bring resort vibes to 80 sqft.\n\nFrom layout to plant palette — full design service.", tags: ["Design", "Layout", "Aesthetics"], city: "Kochi" },
-  { id: "e6", name: "Amitabh Choudhury", avatar: avatar("Amitabh"), specialisation: "Ornamental Plants", rating: 4.6, consultations: 224, price: 199, bio: "Specialist in flowering plants, bonsai, and traditional Indian garden plants.\n\n20 years of bonsai practice.", tags: ["Bonsai", "Flowering plants"], city: "Kolkata" },
-  { id: "e7", name: "Sunita Patel", avatar: avatar("Sunita"), specialisation: "Vegetables & Herbs", rating: 4.7, consultations: 308, price: 249, bio: "Kitchen-garden coach. Growing methi, palak, dhaniya all year on your balcony.\n\nSeasonal planting calendars for Indian metros.", tags: ["Kitchen garden", "Seasonal"], city: "Ahmedabad" },
-  { id: "e8", name: "Vikram Singh", avatar: avatar("Vikram"), specialisation: "Pest Control", rating: 4.5, consultations: 142, price: 179, bio: "Quick diagnosis, practical fixes. Send me a photo, I'll tell you what's wrong.\n\nUrban gardening troubleshooter.", tags: ["Diagnosis", "Quick fixes"], city: "Delhi" },
-];
 
 export type Guide = { slug: string; title: string; excerpt: string; category: string; readTime: string; cover: string; body: string };
 
@@ -134,23 +111,6 @@ export type CommunityPost = {
   ts: string;
 };
 
-export const SEED_POSTS: CommunityPost[] = [
-  { id: "c1", user: "Riya Kapoor", avatar: avatar("Riya"), city: "Mumbai", image: PLANT_PHOTOS.Tulsi, caption: "My tulsi is finally thriving after the repot 🌿 Took me 3 tries to get the soil mix right.", likes: 42, comments: [{ id: "cm1", user: "Anand", avatar: avatar("Anand"), text: "Looks beautiful! What soil mix did you end up with?", ts: "2h" }, { id: "cm2", user: "Meera", avatar: avatar("Meera2"), text: "Where did you buy the pot from?", ts: "1h" }], ts: "3h" },
-  { id: "c2", user: "Arjun Verma", avatar: avatar("Arjun"), city: "Pune", image: PLANT_PHOTOS.Tomato, caption: "First tomato harvest from my balcony 🍅 4kg in one go!", likes: 128, comments: [{ id: "cm3", user: "Priya", avatar: avatar("Priya2"), text: "Amazing! Which variety?", ts: "5h" }], ts: "8h" },
-  { id: "c3", user: "Sneha Iyer", avatar: avatar("Sneha"), city: "Bengaluru", image: PLANT_PHOTOS.Monstera, caption: "New leaf unfurling on my Monstera 💚 The fenestrations are gorgeous.", likes: 89, comments: [], ts: "12h" },
-  { id: "c4", user: "Kabir Singh", avatar: avatar("Kabir"), city: "Delhi", image: PLANT_PHOTOS.Rose, caption: "Roses are finally blooming after the winter prune. Patience paid off!", likes: 67, comments: [{ id: "cm4", user: "Ravi", avatar: avatar("Ravi2"), text: "Which variety is this?", ts: "1d" }], ts: "1d" },
-  { id: "c5", user: "Divya Nair", avatar: avatar("Divya"), city: "Kochi", image: PLANT_PHOTOS.Hibiscus, caption: "Red hibiscus — Kerala in a pot 🌺", likes: 54, comments: [], ts: "1d" },
-  { id: "c6", user: "Aman Khan", avatar: avatar("Aman"), city: "Hyderabad", image: PLANT_PHOTOS.Chilli, caption: "Chilli harvest! 🌶️ Bhut jolokia from seed to fruit in 90 days.", likes: 92, comments: [{ id: "cm5", user: "Sunita", avatar: avatar("Sunita2"), text: "Spicy! 🔥", ts: "2d" }], ts: "2d" },
-  { id: "c7", user: "Pooja Reddy", avatar: avatar("Pooja"), city: "Bengaluru", image: PLANT_PHOTOS.Marigold, caption: "Marigolds for Diwali season 🪔", likes: 76, comments: [], ts: "2d" },
-  { id: "c8", user: "Vivek Joshi", avatar: avatar("Vivek"), city: "Mumbai", image: PLANT_PHOTOS["Money Plant"], caption: "Money plant is taking over my window 😅 Time to propagate.", likes: 38, comments: [], ts: "3d" },
-  { id: "c9", user: "Tara Bose", avatar: avatar("Tara"), city: "Kolkata", image: PLANT_PHOTOS.Jasmine, caption: "Mogra in full bloom — the whole balcony smells divine.", likes: 102, comments: [], ts: "3d" },
-  { id: "c10", user: "Nikhil Rao", avatar: avatar("Nikhil"), city: "Pune", image: PLANT_PHOTOS["Snake Plant"], caption: "Snake plant babies! Free plants for my friends.", likes: 45, comments: [], ts: "3d" },
-  { id: "c11", user: "Aditi Mishra", avatar: avatar("Aditi"), city: "Lucknow", image: PLANT_PHOTOS.Mint, caption: "Pudina for the chai ☕", likes: 31, comments: [], ts: "4d" },
-  { id: "c12", user: "Rohan Das", avatar: avatar("Rohan"), city: "Mumbai", image: PLANT_PHOTOS["Aloe Vera"], caption: "Aloe vera plot — never buy aloe gel again.", likes: 58, comments: [], ts: "4d" },
-  { id: "c13", user: "Neha Gupta", avatar: avatar("Neha"), city: "Delhi", image: PLANT_PHOTOS["Fiddle Leaf Fig"], caption: "FLF is thriving! Bright indirect light + weekly water = happy plant.", likes: 81, comments: [], ts: "5d" },
-  { id: "c14", user: "Sameer Pillai", avatar: avatar("Sameer"), city: "Chennai", image: PLANT_PHOTOS.Coriander, caption: "Dhaniya from seed — homemade chutney incoming.", likes: 27, comments: [], ts: "5d" },
-  { id: "c15", user: "Lakshmi Sundar", avatar: avatar("Lakshmi"), city: "Bengaluru", image: PLANT_PHOTOS.Bougainvillea, caption: "Bougainvillea cascading over my railing 💕", likes: 113, comments: [], ts: "6d" },
-];
 
 export type MapGardener = { id: string; name: string; avatar: string; area: string; plantCount: number; lat: number; lng: number; recentPosts: string[] };
 export type MapNursery = { id: string; name: string; address: string; rating: number; openNow: boolean; lat: number; lng: number };
