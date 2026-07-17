@@ -16,3 +16,10 @@ pydantic-settings>=2.0.0  # Used in app/core/settings.py to parse and validate .
 
 # External HTTP Client
 httpx>=0.24.0  # Async HTTP client used for external requests (e.g., Razorpay verification/AI calls)
+pyjwt
+python-dotenv
+agno
+google-generativeai
+google-genai
+firecrawl-py
+exa-py

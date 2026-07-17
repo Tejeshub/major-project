@@ -27,6 +27,11 @@ app.include_router(experts_router)
 app.include_router(reminders_router)
 app.include_router(notifications_router)
 app.include_router(support_router)
+from app.detections.router import router as detections_router
+from app.weather.router import router as weather_router
+
+app.include_router(detections_router)
+app.include_router(weather_router)
 
 # Configure CORS
 app.add_middleware(
@@ -49,7 +54,7 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={
             "error": {
                 "code": "internal_error",
-                "message": "An unexpected error occurred."
+                "message": str(exc)
             }
         },
     )

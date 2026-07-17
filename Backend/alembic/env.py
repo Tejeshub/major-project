@@ -15,17 +15,10 @@ from app.core.settings import settings
 from app.core.database import Base
 from app.auth.models import User
 from app.plants.models import PlantProfile
-from app.marketplace.models import Product, Order, OrderItem
-from app.community.models import Post, PostLike, PostComment
-from app.experts.models import ExpertProfile, Consultation, ConsultationMessage
-from app.reminders.models import Reminder
-from app.notifications.models import Notification
-from app.support.models import SupportTicket
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -78,11 +71,12 @@ async def run_async_migrations() -> None:
     and associate a connection with the context.
 
     """
+    from sqlalchemy.ext.asyncio import create_async_engine
 
-    connectable = async_engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
+    connectable = create_async_engine(
+        settings.DATABASE_URL,
         poolclass=pool.NullPool,
+        connect_args={"statement_cache_size": 0, "prepared_statement_cache_size": 0}
     )
 
     async with connectable.connect() as connection:

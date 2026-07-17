@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str
     EXA_API_KEY: str
     FIRECRAWL_API_KEY: str
+    PLANT_ID_API_KEY: str | None = None
 
     # Razorpay
     RAZORPAY_KEY_ID: str

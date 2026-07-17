@@ -19,6 +19,7 @@ function DetectCapture() {
   const cycle = useApp(s => s.detectionCycle);
   const { canScan, scanRemaining } = useGates();
   const [photo, setPhoto] = useState<string>("");
+  const [photoBase64, setPhotoBase64] = useState<string>("");
   const [plantId, setPlantId] = useState<string>(plants[0]?.id || "");
   const [analyzing, setAnalyzing] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -28,30 +29,50 @@ function DetectCapture() {
     if (!f) return;
     const url = URL.createObjectURL(f);
     setPhoto(url);
+
+    // Also read as base64 for the API
+    const reader = new FileReader();
+    reader.onload = () => {
+      setPhotoBase64(reader.result as string);
+    };
+    reader.readAsDataURL(f);
   };
 
-  const analyse = () => {
+  const analyse = async () => {
     if (!canScan) { setShowGate(true); return; }
+    if (!plantId) { toast.error("Please select a plant to analyse"); return; }
     setAnalyzing(true);
-    setTimeout(() => {
-      // pick result: every 5th = low confidence
-      const idx = ((cycle + 1) % 5 === 0) ? 4 : cycle % 4;
-      const r = MOCK_DETECTIONS[idx];
-      const plant = plants.find(p => p.id === plantId);
+    
+    try {
+      const { fetchWithAuth } = await import("@/lib/apiClient");
+      
+      const response = await fetchWithAuth("/detections", {
+        method: "POST",
+        body: JSON.stringify({
+          plant_id: parseInt(plantId, 10),
+          image_url: photoBase64 || "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&w=800&q=70"
+        })
+      });
+
+      const plant = plants.find(p => String(p.id) === String(plantId));
       const id = addDetection({
-        plantId: plantId || undefined,
+        plantId: String(plantId),
         plantName: plant?.nickname,
-        photo: photo || "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&w=800&q=70",
-        diseaseName: r.name,
-        confidence: r.confidence,
-        symptoms: r.symptoms,
-        treatment: r.treatment,
-        crossSellId: r.crossSellId,
-        lowConfidence: r.confidence < 60,
+        photo: photo || response.image_url,
+        diseaseName: response.disease_name,
+        confidence: response.confidence,
+        symptoms: `Based on AI analysis, this plant shows signs of ${response.disease_name}.`,
+        treatment: response.treatment_text ? [response.treatment_text] : ["Ensure adequate water and sunlight."],
+        crossSellId: "prod-2", // Hardcoding a cross-sell ID from SEED_PRODUCTS for the demo
+        lowConfidence: response.confidence < 60,
       });
       incrementScanCount();
       navigate({ to: "/detect/result/$id", params: { id } });
-    }, 2500);
+    } catch (e: any) {
+      toast.error(`Analysis failed: ${e.message}`);
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   if (analyzing) {

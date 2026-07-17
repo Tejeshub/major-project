@@ -88,6 +88,7 @@ type AppState = {
   login: (name: string, email: string, role?: Role) => void;
   syncUserWithBackend: () => Promise<void>;
   fetchPlants: () => Promise<void>;
+  fetchDetections: () => Promise<void>;
   logout: () => void;
   setOnboarding: (gardenType: string, plants: string[]) => void;
   addPlant: (p: Omit<UserPlant, "id" | "addedAt">) => Promise<void>;
@@ -153,10 +154,22 @@ export const useApp = create<AppState>()(
               role: userData.role 
             });
             await get().fetchPlants();
+            await get().fetchDetections();
           }
         } catch (e: any) {
           console.error("Failed to sync user with backend", e);
           toast.error(`Backend Error: ${e.message || "Could not connect to API"}`);
+        }
+      },
+      fetchDetections: async () => {
+        try {
+          // If we had an endpoint that fetches ALL detections for the user:
+          // const { fetchWithAuth } = await import("@/lib/apiClient");
+          // const response = await fetchWithAuth("/detections/all");
+          // But our endpoint is /detections?plant_id=...
+          // For now, we will rely on Zustand persistence or fetch per plant if needed
+        } catch (e) {
+          console.error("Failed to fetch detections", e);
         }
       },
       fetchPlants: async () => {
