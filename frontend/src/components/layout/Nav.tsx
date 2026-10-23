@@ -40,7 +40,7 @@ export function TopNav() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-40 bg-background/85 backdrop-blur border-b border-border/60">
+    <header className="sticky top-0 z-40 bg-cream-bg/90 backdrop-blur-md border-b border-sage-border/70">
       <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
         <Logo />
         <nav className="hidden md:flex items-center gap-8">
@@ -50,10 +50,10 @@ export function TopNav() {
               <Link
                 key={l.to}
                 to={l.to}
-                className={`text-sm font-medium transition-colors ${active ? "text-rust" : "text-ink/70 hover:text-ink"}`}
+                className={`text-sm font-medium tracking-tight transition-all duration-200 ${active ? "text-terracotta font-semibold" : "text-forest-muted hover:text-forest-dark"}`}
               >
                 {l.label}
-                {active && <span className="block h-0.5 w-1.5 bg-rust rounded-full mx-auto mt-1" />}
+                {active && <span className="block h-0.5 w-2 bg-terracotta rounded-full mx-auto mt-1" />}
               </Link>
             );
           })}
@@ -71,37 +71,37 @@ export function TopNav() {
               </button>
               
               {showNotif && (
-                <div className="absolute right-0 mt-2 w-80 bg-background border border-border shadow-lg rounded-xl overflow-hidden flex flex-col z-50">
-                  <div className="p-3 border-b border-border flex items-center justify-between bg-secondary/30">
-                    <h3 className="font-semibold text-sm">Notifications</h3>
+                <div className="absolute right-0 mt-2 w-80 bg-cream-surface border border-sage-border shadow-warm-lg rounded-2xl overflow-hidden flex flex-col z-50">
+                  <div className="p-3.5 border-b border-sage-border flex items-center justify-between bg-sand-deep/60">
+                    <h3 className="font-display font-semibold text-sm text-forest-dark">Notifications</h3>
                     <div className="flex gap-2">
                       {unreadCount > 0 && (
-                        <button onClick={() => markAllRead()} className="text-xs text-ink/70 hover:text-rust transition flex items-center gap-1">
-                          <Check className="w-3 h-3" /> Mark all read
+                        <button onClick={() => markAllRead()} className="text-xs text-forest-muted hover:text-terracotta transition flex items-center gap-1 font-medium">
+                          <Check className="w-3.5 h-3.5" strokeWidth={1.75} /> Mark all read
                         </button>
                       )}
                     </div>
                   </div>
                   <div className="max-h-80 overflow-y-auto">
                     {notifications.length === 0 ? (
-                      <div className="p-6 text-center text-sm text-ink/60">No notifications yet.</div>
+                      <div className="p-6 text-center text-sm text-forest-muted">No notifications yet.</div>
                     ) : (
-                      <div className="divide-y divide-border/50">
+                      <div className="divide-y divide-sage-border/50">
                         {notifications.slice(0, 5).map(n => (
-                          <div key={n.id} className={`p-3 transition hover:bg-secondary/20 flex gap-3 ${!n.isRead ? 'bg-rust/5' : ''}`}>
+                          <div key={n.id} className={`p-3.5 transition hover:bg-sand-deep/40 flex gap-3 ${!n.isRead ? 'bg-terracotta/5' : ''}`}>
                             <div className="flex-1 min-w-0">
-                              <p className={`text-sm mb-0.5 truncate ${!n.isRead ? 'font-medium' : 'text-ink/80'}`}>{n.title}</p>
-                              <p className="text-xs text-ink/60 line-clamp-2">{n.message}</p>
+                              <p className={`text-sm mb-0.5 truncate ${!n.isRead ? 'font-semibold text-forest-dark' : 'text-forest-dark/80'}`}>{n.title}</p>
+                              <p className="text-xs text-forest-muted line-clamp-2 leading-relaxed">{n.message}</p>
                               <div className="flex items-center gap-2 mt-1.5">
-                                <span className="text-[10px] text-ink/50 flex items-center gap-1">
-                                  <Clock className="w-3 h-3" /> {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
+                                <span className="text-[10px] text-forest-muted/70 flex items-center gap-1">
+                                  <Clock className="w-3 h-3" strokeWidth={1.75} /> {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
                                 </span>
                               </div>
                             </div>
                             {!n.isRead && (
                               <button 
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); markRead(n.id); }}
-                                className="w-2 h-2 rounded-full bg-rust mt-1.5"
+                                className="w-2.5 h-2.5 rounded-full bg-terracotta mt-1.5 shrink-0"
                                 aria-label="Mark as read"
                               />
                             )}
@@ -110,7 +110,7 @@ export function TopNav() {
                       </div>
                     )}
                   </div>
-                  <Link to="/notifications" onClick={() => setShowNotif(false)} className="p-2.5 text-center text-xs font-medium bg-secondary/50 hover:bg-secondary transition border-t border-border block">
+                  <Link to="/notifications" onClick={() => setShowNotif(false)} className="p-3 text-center text-xs font-semibold text-forest-dark bg-sand-deep/40 hover:bg-sand-deep transition border-t border-sage-border block">
                     View all notifications
                   </Link>
                 </div>
@@ -118,18 +118,18 @@ export function TopNav() {
             </div>
           )}
           {user && (
-            <Link to="/cart" className="relative p-2 rounded-full hover:bg-secondary transition" aria-label="Cart">
-              <ShoppingBag className="w-5 h-5 text-ink" />
-              {cartCount > 0 && <span className="absolute -top-0.5 -right-0.5 bg-rust text-[10px] text-white rounded-full w-4 h-4 flex items-center justify-center">{cartCount}</span>}
+            <Link to="/cart" className="relative p-2 rounded-full hover:bg-sand-deep transition-all duration-200 active:scale-95" aria-label="Cart">
+              <ShoppingBag className="w-5 h-5 text-forest-dark" strokeWidth={1.75} />
+              {cartCount > 0 && <span className="absolute -top-0.5 -right-0.5 bg-terracotta text-[10px] font-semibold text-cream-bg rounded-full w-4 h-4 flex items-center justify-center shadow-sm">{cartCount}</span>}
             </Link>
           )}
           {user ? (
-            <Link to="/profile" className="flex items-center gap-2">
-              <img src={user.avatar} alt="" className="w-9 h-9 rounded-full bg-secondary" />
+            <Link to="/profile" className="flex items-center gap-2 transition-transform hover:scale-105 active:scale-95">
+              <img src={user.avatar} alt="" className="w-9 h-9 rounded-full bg-sand-deep border border-sage-border/80 object-cover" />
             </Link>
           ) : (
             <>
-              <Link to="/login" className="text-sm text-ink/80 hover:text-ink hidden md:inline">Sign in</Link>
+              <Link to="/login" className="text-sm font-medium text-forest-muted hover:text-forest-dark hidden md:inline transition-colors">Sign in</Link>
               <Link to="/login" className="btn-rust !py-2 !px-4 text-sm">Get started</Link>
             </>
           )}
@@ -149,15 +149,15 @@ const TABS = [
 export function MobileTabs() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur border-t border-border/60 pb-[env(safe-area-inset-bottom)]">
+    <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-cream-surface/95 backdrop-blur-md border-t border-sage-border pb-[env(safe-area-inset-bottom)] shadow-warm-lg">
       <div className="flex">
         {TABS.map(({ to, label, icon: Icon, match }) => {
           const active = match.some((m) => pathname.startsWith(m));
           return (
-            <Link key={to} to={to} className="flex-1 py-2.5 flex flex-col items-center gap-0.5 transition-colors">
-              <Icon className={`w-5 h-5 ${active ? "text-rust" : "text-ink/55"}`} />
-              <span className={`text-[10px] font-medium ${active ? "text-rust" : "text-ink/55"}`}>{label}</span>
-              {active && <span className="block h-1 w-1 bg-rust rounded-full" />}
+            <Link key={to} to={to} className="flex-1 py-2.5 flex flex-col items-center gap-1 transition-colors">
+              <Icon className={`w-5 h-5 ${active ? "text-terracotta" : "text-forest-muted"}`} strokeWidth={1.75} />
+              <span className={`text-[11px] font-medium tracking-tight ${active ? "text-terracotta font-semibold" : "text-forest-muted"}`}>{label}</span>
+              {active && <span className="block h-1 w-1 bg-terracotta rounded-full" />}
             </Link>
           );
         })}

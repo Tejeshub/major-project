@@ -144,3 +144,39 @@ export const MOCK_DETECTIONS = [
   { name: "Aphid Infestation", confidence: 65, symptoms: "Tiny green/black insects clustered on new shoots, sticky residue on leaves, distorted new growth.", treatment: ["Blast plant with water to dislodge aphids.", "Spray neem oil solution every 3 days for 2 weeks.", "Introduce ladybugs if available.", "Inspect underside of leaves weekly."], crossSellId: "p3" },
   { name: "Leaf Spot Disease", confidence: 45, symptoms: "", treatment: [], crossSellId: "p13" }, // low-confidence
 ];
+
+export const SEED_POSTS: CommunityPost[] = [
+  {
+    id: "sp1",
+    user: "Sneha Iyer",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sneha&backgroundColor=f6dba0,e7b9a3,f0e8da",
+    city: "Mumbai",
+    image: "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&w=900&q=70",
+    caption: "My new Monstera is thriving! 🌿",
+    likes: 12,
+    comments: [],
+    ts: new Date().toISOString()
+  },
+  {
+    id: "sp2",
+    user: "Arjun Verma",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Arjun&backgroundColor=f6dba0,e7b9a3,f0e8da",
+    city: "Delhi",
+    image: "https://images.unsplash.com/photo-1592841200221-a6898f307baa?auto=format&fit=crop&w=900&q=70",
+    caption: "First tomato harvest! 🍅",
+    likes: 45,
+    comments: [],
+    ts: new Date().toISOString()
+  },
+  {
+    id: "sp3",
+    user: "Priya Mehta",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=PriyaM&backgroundColor=f6dba0,e7b9a3,f0e8da",
+    city: "Bangalore",
+    image: "https://images.unsplash.com/photo-1591389703635-e15a07b842d7?auto=format&fit=crop&w=900&q=70",
+    caption: "Jasmine blooming beautifully on my balcony.",
+    likes: 30,
+    comments: [],
+    ts: new Date().toISOString()
+  }
+];

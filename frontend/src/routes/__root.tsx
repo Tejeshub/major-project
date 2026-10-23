@@ -54,7 +54,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" },
       { rel: "stylesheet", href: "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css", integrity: "sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=", crossOrigin: "" },
       { rel: "stylesheet", href: appCss },
     ],
@@ -71,7 +71,13 @@ function RootShell({ children }: { children: ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="relative min-h-screen bg-cream-bg text-forest-dark antialiased selection:bg-terracotta/20 selection:text-terracotta">
+        {/* Subtle Japanese watercolor paper texture overlay */}
+        <div
+          className="fixed inset-0 pointer-events-none z-50 opacity-[0.14] mix-blend-multiply bg-repeat"
+          style={{ backgroundImage: "url('/assets/ghibli/paper-texture.jpg')", backgroundSize: "320px 320px" }}
+          aria-hidden="true"
+        />
         {children}
         <Scripts />
       </body>
