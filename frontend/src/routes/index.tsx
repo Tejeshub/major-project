@@ -46,14 +46,14 @@ function Landing() {
 
       {/* Hero with Ghibli Meadow Atmospheric Backdrop */}
       <section ref={heroRef} className="relative overflow-hidden pt-12 md:pt-20 pb-20 md:pb-32">
-        {/* Scenic Ghibli Background Layer */}
+        {/* Scenic Ghibli Background Layer - Vibrant & Hand-painted */}
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-40 md:opacity-45 scale-105 pointer-events-none transition-transform duration-1000"
+          className="absolute inset-0 bg-cover bg-center opacity-70 md:opacity-75 scale-105 pointer-events-none transition-transform duration-1000"
           style={{ backgroundImage: "url('/assets/ghibli/ghibli-garden-landscape.jpg')" }}
           aria-hidden="true"
         />
-        {/* Soft Watercolor Mist Gradient Overlay ensuring 100% text legibility */}
-        <div className="absolute inset-0 bg-gradient-to-b from-cream-bg/85 via-cream-bg/92 to-cream-bg pointer-events-none" aria-hidden="true" />
+        {/* Soft Warm Sunlight Gradient Overlay ensuring vibrant art shows through with full text legibility */}
+        <div className="absolute inset-0 bg-gradient-to-b from-cream-bg/40 via-cream-bg/65 to-cream-bg/95 pointer-events-none" aria-hidden="true" />
 
         {/* Hero Content */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-6 grid md:grid-cols-2 gap-12 items-center">
@@ -84,12 +84,13 @@ function Landing() {
 
       {/* Features with Soft Wavy Divider and Sunrise Backdrop */}
       <section id="features" className="relative py-24 bg-sand-deep/75 border-y border-sage-border/60 overflow-hidden">
-        {/* Subtle Atmospheric Sky Scenery */}
+        {/* Bright Vibrant Sky Mist Scenery */}
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-30 pointer-events-none mix-blend-multiply"
+          className="absolute inset-0 bg-cover bg-center opacity-65 pointer-events-none"
           style={{ backgroundImage: "url('/assets/ghibli/sky-mist-clean.jpg')" }}
           aria-hidden="true"
         />
+        <div className="absolute inset-0 bg-cream-bg/40 pointer-events-none" aria-hidden="true" />
         <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-6">
           <p className="eyebrow text-center">What's inside</p>
           <h2 className="font-display text-3xl md:text-5xl text-center mt-3 text-forest-dark font-bold">Everything your balcony needs.</h2>
@@ -122,10 +123,11 @@ function Landing() {
       {/* Testimonials with Warm Cottagecore Glow */}
       <section className="relative py-24 bg-sand-deep/60 border-y border-sage-border/60 overflow-hidden">
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-25 pointer-events-none mix-blend-multiply"
+          className="absolute inset-0 bg-cover bg-center opacity-55 pointer-events-none"
           style={{ backgroundImage: "url('/assets/ghibli/botanical-greenery-clean.jpg')" }}
           aria-hidden="true"
         />
+        <div className="absolute inset-0 bg-cream-bg/40 pointer-events-none" aria-hidden="true" />
         <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-6">
           <p className="eyebrow text-center">From the community</p>
           <h2 className="font-display text-3xl md:text-5xl text-center mt-3 text-forest-dark font-bold">Loved by gardeners across India.</h2>

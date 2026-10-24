@@ -88,11 +88,11 @@ function LoginPage() {
     <div className="relative min-h-screen flex flex-col bg-cream-bg overflow-hidden">
       {/* Soft scenic backdrop */}
       <div
-        className="absolute inset-0 bg-cover bg-center opacity-25 pointer-events-none mix-blend-multiply"
-        style={{ backgroundImage: "url('/assets/ghibli/botanical-greenery-clean.jpg')" }}
+        className="absolute inset-0 bg-cover bg-center opacity-55 pointer-events-none"
+        style={{ backgroundImage: "url('/assets/ghibli/bg-plants.jpg')" }}
         aria-hidden="true"
       />
-      <div className="absolute inset-0 bg-radial from-cream-bg/75 via-cream-bg/92 to-cream-bg pointer-events-none" aria-hidden="true" />
+      <div className="absolute inset-0 bg-radial from-cream-bg/40 via-cream-bg/70 to-cream-bg/90 pointer-events-none" aria-hidden="true" />
 
       <div className="relative z-10 px-6 py-5"><Logo /></div>
       <main className="relative z-10 flex-1 flex items-center justify-center px-4 pb-12">

@@ -47,10 +47,10 @@ function Dashboard() {
 
       {/* Weather card with Atmospheric Canopy Backdrop */}
       <div className="relative overflow-hidden rounded-3xl border border-sage-border bg-cream-surface/90 backdrop-blur-md p-6 md:p-8 flex flex-wrap items-center justify-between gap-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-        {/* Subtle Ghibli botanical wash in corner */}
+        {/* Bright Ghibli botanical wash in corner */}
         <div
-          className="absolute right-0 top-0 bottom-0 w-1/2 bg-cover bg-right opacity-20 pointer-events-none mix-blend-multiply"
-          style={{ backgroundImage: "url('/assets/ghibli/botanical-greenery-clean.jpg')" }}
+          className="absolute right-0 top-0 bottom-0 w-2/3 bg-cover bg-right opacity-35 pointer-events-none"
+          style={{ backgroundImage: "url('/assets/ghibli/bg-plants.jpg')" }}
           aria-hidden="true"
         />
         <div className="relative z-10 flex items-center gap-5">
