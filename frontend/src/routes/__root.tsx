@@ -95,11 +95,15 @@ function RootComponent() {
       if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
         await syncUserWithBackend();
         const state = useApp.getState();
+        const currentPath = router.state.location.pathname || window.location.pathname;
         if (state.user) {
-          if (state.plants.length === 0) {
-            router.navigate({ to: "/onboarding" });
-          } else {
-            router.navigate({ to: "/dashboard" });
+          // NEVER redirect if the user is already on a valid application route (like /detect, /plants, /community, etc.)
+          if (currentPath === "/login" || currentPath === "/") {
+            if (state.plants.length === 0) {
+              router.navigate({ to: "/onboarding" });
+            } else {
+              router.navigate({ to: "/dashboard" });
+            }
           }
         } else {
           router.navigate({ to: "/login" });
@@ -110,6 +114,26 @@ function RootComponent() {
     });
     return () => { subscription.unsubscribe(); };
   }, [syncUserWithBackend, router]);
+
+  useEffect(() => {
+    // Notify backend whenever user visits a frontend route
+    const unsubscribe = router.subscribe("onResolved", ({ toLocation }) => {
+      fetch("/api/v1/audit/frontend-route", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: toLocation.pathname }),
+      }).catch(() => {});
+    });
+
+    // Also log initial route
+    fetch("/api/v1/audit/frontend-route", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ path: window.location.pathname }),
+    }).catch(() => {});
+
+    return () => { unsubscribe(); };
+  }, [router]);
 
   return (
     <QueryClientProvider client={queryClient}>

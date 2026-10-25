@@ -40,7 +40,7 @@ function RemindersPage() {
   const completed = filteredReminders.filter(r => r.status === "completed").sort((a, b) => new Date(b.dueAt).getTime() - new Date(a.dueAt).getTime());
 
   const icon = (t: string) => t === "Water" ? Droplets : t === "Fertilize" ? Sprout : Scissors;
-  const plantOf = (id: string) => plants.find(p => String(p.id) === String(id));
+  const plantOf = (id: string | number) => plants.find(p => String(p.id) === String(id));
 
   const save = () => {
     if (!form.plantId) { toast.error("Add a plant first"); return; }

@@ -33,10 +33,32 @@ from app.weather.router import router as weather_router
 app.include_router(detections_router)
 app.include_router(weather_router)
 
+from pydantic import BaseModel
+import time
+
+class RouteLogRequest(BaseModel):
+    path: str
+    action: str | None = None
+
+@app.post("/api/v1/audit/frontend-route")
+async def audit_frontend_route(data: RouteLogRequest):
+    print(f"\n🌱 [FRONTEND ROUTE] Navigated to: {data.path}" + (f" | Action: {data.action}" if data.action else ""))
+    return {"status": "ok"}
+
+# Request logging middleware
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    duration = (time.time() - start_time) * 1000
+    if request.url.path != "/api/v1/audit/frontend-route":
+        print(f"👉 [HTTP] {request.method} {request.url.path} -> {response.status_code} ({duration:.1f}ms)")
+    return response
+
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL, "http://127.0.0.1:5173"],
+    allow_origins=[settings.FRONTEND_URL, "http://127.0.0.1:5173", "http://localhost:8080"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

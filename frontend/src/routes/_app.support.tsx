@@ -3,7 +3,7 @@ import { useSupportTickets, useCreateSupportTicket } from "@/hooks/useSupport";
 import { HelpCircle, Plus, AlertCircle, Clock, CheckCircle2, MoreHorizontal } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/support")({
   component: SupportPage,

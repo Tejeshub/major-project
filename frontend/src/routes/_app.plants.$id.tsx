@@ -2,7 +2,7 @@ import { createFileRoute, useParams, useNavigate } from "@tanstack/react-router"
 import { useApp } from "@/stores/app";
 import { PLANT_PHOTOS } from "@/data/seed";
 import { Edit2, Trash2, Droplets, Sprout, Scissors } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AddPlantModal } from "@/components/AddPlantModal";
 import { useReminders, useCompleteReminder } from "@/hooks/useReminders";
 import { toast } from "sonner";
@@ -14,9 +14,21 @@ export const Route = createFileRoute("/_app/plants/$id")({
 function PlantDetail() {
   const { id } = useParams({ from: "/_app/plants/$id" });
   const navigate = useNavigate();
-  const plant = useApp((s) => s.plants.find(p => p.id === id));
-  const detections = useApp((s) => s.detections.filter(d => d.plantId === id));
+  const plants = useApp((s) => s.plants);
+  const fetchPlants = useApp((s) => s.fetchPlants);
+  const plant = plants.find(p => p.id === id);
+  const allDetections = useApp((s) => s.detections);
+  const detections = allDetections.filter(d => d.plantId === id);
   
+  const [loadingPlant, setLoadingPlant] = useState(!plant && plants.length === 0);
+
+  useEffect(() => {
+    if (!plant && plants.length === 0) {
+      setLoadingPlant(true);
+      fetchPlants().finally(() => setLoadingPlant(false));
+    }
+  }, [plant, plants.length, fetchPlants]);
+
   const { data: allReminders = [], isLoading: isLoadingReminders, isError: isErrorReminders } = useReminders();
   const { mutate: completeReminder } = useCompleteReminder();
   const reminders = allReminders.filter((r: any) => String(r.plantId) === id && r.status !== "completed");
@@ -25,7 +37,22 @@ function PlantDetail() {
   const [editOpen, setEditOpen] = useState(false);
   const [confirmDel, setConfirmDel] = useState(false);
 
-  if (!plant) return <div className="text-center py-20 text-muted-foreground">Plant not found.</div>;
+  if (loadingPlant) {
+    return <div className="text-center py-20 text-muted-foreground animate-pulse">Loading plant details...</div>;
+  }
+
+  if (!plant) {
+    return (
+      <div className="card-warm p-8 text-center max-w-md mx-auto my-12 space-y-4">
+        <div className="text-4xl">🪴</div>
+        <h2 className="font-display text-xl text-foreground">Plant not found</h2>
+        <p className="text-sm text-muted-foreground">This plant may have been removed or does not exist.</p>
+        <button onClick={() => navigate({ to: "/dashboard" })} className="btn-rust !py-2 !px-4 text-sm inline-block">
+          Back to Garden
+        </button>
+      </div>
+    );
+  }
 
   const icon = (t: string) => t === "Water" ? Droplets : t === "Fertilize" ? Sprout : Scissors;
 
